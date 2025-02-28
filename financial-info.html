@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIU Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background: linear-gradient(to right, #16222A, #3A6073);
+            color: #fff;
+        }
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 20px;
+            height: 365vh;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .sidebar ul li {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar ul li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            position: relative;
+        }
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 5px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 70px;
+        }
+        select, button, input[type="text"], input[type="date"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        select option {
+            color: black;
+        }
+        button {
+            background: #FFD700;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #FFC107;
+        }
+        .instruction {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: auto;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 20px;
+            color: white;
+        }
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            width: 100px;
+            height: auto;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .form-section h3 {
+            margin-bottom: 10px;
+            color: #FFD700;
+        }
+        .form-section label {
+            display: block;
+            margin-top: 10px;
+        }
+        .form-section table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .form-section table td {
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-section table td b {
+            color: #FFD700;
+        }
+        .cgpa-conversion {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #FFD700;
+        }
+        .hidden-field {
+            display: none;
+        }
+        .reminder {
+            color: #FFD700;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .two-column {
+            display: flex;
+            gap: 30px; /* Increased gap for better spacing */
+        }
+        .two-column > div {
+            flex: 1;
+        }
+        .input-group {
+            margin-bottom: 20px; /* Added space between input fields */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="logo.jpg" alt="AIU Logo" width="150" height="auto"> <!-- Adjusted logo size -->
+        </div>
+        <ul>
+            <li>📁 Upload Documents</li>
+            <li>📄 View Status</li>
+            <li>🔑 Logout</li>
+        </ul>
+        <div class="footer">
+            <p style="margin-top: 1990px;">© AIU 2025 | Inspiring Minds</p>
+        </div>
+    </div>
+    <div class="content">
+        <div class="instruction">
+            <p>Please provide your financial information, scholarship details, and parent/guardian information.</p>
+        </div>
+        <div class="form-container">
+            <!-- Financial Information Section -->
+            <div class="form-section">
+                <h3>Financial Information</h3>
+                <p>If you have any questions about the scholarship, kindly reach out to us at <a href="mailto:scholarships@albu.edu.my" style="color: #FFD700;">scholarships@albu.edu.my</a> (Scholarship Unit).</p>
+
+                <p><strong>All applicants are entitled to apply for Albukhary Scholarship Programmes. The categories are as per below:</strong></p>
+                <ul>
+                    <li><strong>Full Scholarship:</strong> Tuition Fee, Accommodation, and Monthly Allowance</li>
+                    <li><strong>Partial Scholarship:</strong>
+                        <ul>
+                            <li>Tuition Fee ONLY, OR</li>
+                            <li>Tuition Fee and Accommodation, OR</li>
+                            <li>Tuition Fee and Monthly Allowance</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <p class="reminder"><strong>REMINDER:</strong> This section is mandatory to be filled. Failure to do so may cause your application to be rejected.</p>
+            </div>
+
+            <!-- Scholarship Application Section -->
+            <div class="form-section">
+                <h3>Scholarship Application</h3>
+                <p>Please note that AIU reserves full rights to reject or terminate any application for scholarship that contains plagiarism or fraudulent information without prior notice to the applicant.</p>
+
+                <label>Are you referred to AIU by an organization or AIU collaborators?</label>
+                <select>
+                    <option>Select</option>
+                    <option>Yes</option>
+                    <option>No</option>
+                </select>
+
+                <label>1. Why should the Albukhary Foundation sponsor you? (COMPULSORY to complete 150 words)</label>
+                <textarea placeholder="Please write your statement here. Your statement should contain at least 150 words." rows="5"></textarea>
+
+                <label>2. How will the scholarship impact your future? (COMPULSORY to complete 150 words)</label>
+                <textarea placeholder="Please write your statement here. Your statement should contain at least 150 words." rows="5"></textarea>
+
+                <label>3. What makes you a suitable and good candidate? (COMPULSORY to complete 150 words)</label>
+                <textarea placeholder="Please write your statement here. Your statement should contain at least 150 words." rows="5"></textarea>
+            </div>
+
+            <!-- Parent's / Legal Guardian Information Section -->
+            <div class="form-section">
+                <h3>Parent's / Legal Guardian Information</h3>
+                <div class="two-column">
+                    <div>
+                        <div class="input-group">
+                            <label>Marital Status *</label>
+                            <select>
+                                <option>Select Marital Status</option>
+                                <option>Single</option>
+                                <option>Married</option>
+                                <option>Divorced</option>
+                                <option>Widowed</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Name (Father / Guardian I) *</label>
+                            <input type="text" placeholder="Enter your father’s name / legal guardian I name">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Identity Number *</label>
+                            <input type="text" placeholder="e.g., MyKad number or Passport Number">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Nationality *</label>
+                            <select>
+                                <option>Select Country</option>
+                                <!-- Add countries here -->
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Phone Number *</label>
+                            <input type="text" placeholder="e.g., 01234567890">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Relationship *</label>
+                            <select>
+                                <option>Select Relationship</option>
+                                <option>Father</option>
+                                <option>Guardian</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Occupation Type *</label>
+                            <input type="text" placeholder="Enter Occupation Type">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Salary (USD) *</label>
+                            <input type="text" placeholder="Convert your local currency into USD. Click HERE">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-group">
+                            <label>Marital Status *</label>
+                            <select>
+                                <option>Select Marital Status</option>
+                                <option>Single</option>
+                                <option>Married</option>
+                                <option>Divorced</option>
+                                <option>Widowed</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Name (Mother / Guardian II) *</label>
+                            <input type="text" placeholder="Enter your mother’s name / legal guardian II name">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Identity Number *</label>
+                            <input type="text" placeholder="e.g., MyKad number or Passport Number">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Nationality *</label>
+                            <select>
+                                <option>Select Country</option>
+                                <!-- Add countries here -->
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Phone Number *</label>
+                            <input type="text" placeholder="e.g., 01234567890">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Relationship *</label>
+                            <select>
+                                <option>Select Relationship</option>
+                                <option>Mother</option>
+                                <option>Guardian</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Occupation Type *</label>
+                            <input type="text" placeholder="Enter Occupation Type">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Salary (USD) *</label>
+                            <input type="text" placeholder="Convert your local currency into USD. Click HERE">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reference Section -->
+            <div class="form-section">
+                <h3>Reference</h3>
+                <div class="two-column">
+                    <div>
+                        <div class="input-group">
+                            <label>Referee 1 Name *</label>
+                            <input type="text" placeholder="Enter Referee (I) Name">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Relationship *</label>
+                            <input type="text" placeholder="e.g., Lecturer/Employer or etc.">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Contact Number *</label>
+                            <input type="text" placeholder="e.g., 01234567890">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Email *</label>
+                            <input type="text" placeholder="e.g., refereeemail@xxxxx.com">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Address *</label>
+                            <textarea placeholder="e.g., Office Address / Permanent Address"></textarea>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="input-group">
+                            <label>Referee 2 Name *</label>
+                            <input type="text" placeholder="Enter Referee (II) Name">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Relationship *</label>
+                            <input type="text" placeholder="e.g., Lecturer/Employer or etc.">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Contact Number *</label>
+                            <input type="text" placeholder="e.g., 01234567890">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Email *</label>
+                            <input type="text" placeholder="e.g., refereeemail@xxxxx.com">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Address *</label>
+                            <textarea placeholder="e.g., Office Address / Permanent Address"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Have any of your real sibling(s) / relative(s) been sponsored by AIU?</label>
+                    <select>
+                        <option>Select</option>
+                        <option>Yes</option>
+                        <option>No</option>
+                    </select>
+                </div>
+            </div>
+
+            <button>Save and Proceed</button>
+        </div>
+    </div>
+</body>
+</html>
