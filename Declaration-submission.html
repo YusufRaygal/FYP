@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Declaration and Submission</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            background: linear-gradient(to right, #16222A, #3A6073);
+            color: #fff;
+        }
+        .sidebar {
+            width: 250px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            padding: 20px;
+            height: 100vh;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .sidebar ul li {
+            padding: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar ul li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            position: relative;
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 5px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        .declaration-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .declaration-section h3 {
+            color: #FFD700;
+            margin-bottom: 15px;
+        }
+        .declaration-section ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .declaration-section ul li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .declaration-section ul li::before {
+            content: "•";
+            color: #FFD700;
+            position: absolute;
+            left: 0;
+        }
+        .declaration-section .agree-checkbox {
+            margin-top: 20px;
+        }
+        .declaration-section .agree-checkbox label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .declaration-section .agree-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        .declaration-section .submit-note {
+            margin-top: 20px;
+            color: #FFD700;
+            font-size: 14px;
+            text-align: center;
+        }
+        .declaration-section .submit-button {
+            margin-top: 10px;
+            text-align: center;
+        }
+        .declaration-section .submit-button button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 0;
+        }
+        .declaration-section .submit-button button:hover {
+            background: #FFC107;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-container">
+            <div style="text-align: center;">
+                <img src="logo.jpg" alt="AIU Logo" width="100" height="auto">
+            </div>
+        </div>
+        <ul>
+            <li onclick="location.href='program-selection-info.html'">📋 Program Selection</li>
+            <li onclick="location.href='basic-info.html'">📝 Basic Information</li>
+            <li onclick="location.href='academic-info.html'">📚 Academic Information</li>
+            <li onclick="location.href='financial-info.html'">💵 Financial Information</li>
+            <li onclick="location.href='Document-Uploading.html'">📁 Upload Documents</li>
+            <li onclick="location.href='declaration-submission.html'">✅ Declaration and Submission</li>
+            <li onclick="location.href='view-status.html'">📄 View Status</li>
+            <li onclick="location.href='loginpage.html'">🔑 Logout</li>
+        </ul>
+    </div>
+    <div class="content">
+        <div class="form-container">
+            <!-- Declaration and Submission Section -->
+            <div class="declaration-section">
+                <h3>Statement of Declaration by Applicant</h3>
+                <ul>
+                    <li>I confirm that the information provided in this application form is complete and accurate to the best of my knowledge.</li>
+                    <li>I understand that any false or misleading information may result in the rejection of my application or future termination of my enrollment.</li>
+                    <li>I have read and understood the Personal Data Protection Policy published on the AIU website and consent to the processing of my personal data as defined in the Data Protection Act 2010.</li>
+                    <li>I further understand that I may be required to attend an interview or provide additional documentation as a condition for admission to the program of study for which I have applied.</li>
+                    <li>I confirm that I have never been convicted of any criminal offense in any jurisdiction.</li>
+                    <li>I understand that all decisions regarding my eligibility for admission are final and at the sole discretion of AIU.</li>
+                </ul>
+
+                <div class="agree-checkbox">
+                    <label>
+                        <input type="checkbox" required>
+                        I agree to the above declaration and confirm that all information provided is true and accurate.
+                    </label>
+                </div>
+
+                <!-- Note about submission -->
+                <div class="submit-note">
+                    <strong>Note:</strong> Once you submit your application, you will not be able to make any changes. Please review your information carefully before proceeding.
+                </div>
+
+                <!-- Submit Button -->
+                <div class="submit-button">
+                    <button type="submit">Submit Application</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

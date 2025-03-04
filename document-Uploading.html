@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIU Application</title>
+    <title>AIU Application - Document Submission</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -18,7 +18,7 @@
             background: rgba(0, 0, 0, 0.3);
             color: white;
             padding: 20px;
-            height: 200vh;
+            height: 180vh;
         }
         .sidebar ul {
             list-style: none;
@@ -56,7 +56,7 @@
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             margin-top: 70px;
         }
-        select, button, input[type="text"], input[type="date"], textarea {
+        select, button, input[type="text"], input[type="date"], textarea, input[type="file"] {
             width: 100%;
             padding: 10px;
             margin-top: 10px;
@@ -92,8 +92,8 @@
             margin-bottom: 20px;
         }
         .logo-container img {
-            width: 100px; /* Set the width to match the Program Selection Page */
-            height: auto; /* Maintain aspect ratio */
+            width: 100px;
+            height: auto;
         }
         .form-section {
             margin-bottom: 20px;
@@ -118,12 +118,16 @@
         .form-section table td b {
             color: #FFD700;
         }
+        .mandatory {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <div class="logo-container">
-            <img src="logo.jpg" alt="AIU Logo" width="150" height="auto"> <!-- Adjusted logo size -->
+            <img src="logo.jpg" alt="AIU Logo" width="150" height="auto">
         </div>
         <ul>
             <li onclick="location.href='program-selection-info.html'">📋 Program Selection</li>
@@ -136,98 +140,90 @@
             <li onclick="location.href='loginpage.html'">🔑 Logout</li>
         </ul>
         <div class="footer">
-            <p style="margin-top: 700px;">© AIU 2025 | Inspiring Minds</p>
+            <p style="margin-top: 610px;">© AIU 2025 | Inspiring Minds</p>
         </div>
     </div>
     <div class="content">
         <div class="instruction">
-            <p>Please provide your basic information.</p>
+            <p>Please upload all required documents for your application.</p>
         </div>
         <div class="form-container">
             <div class="form-section">
-                <h3>Personal Details</h3>
+                <h3>Document Checklist</h3>
                 <table>
                     <tr>
-                        <td><b>Address *</b></td>
-                        <td colspan="3">
-                            <input type="text" placeholder="Enter Address Line 1 / Address Line 2 / Select">
-                        </td>
+                        <td><b>No</b></td>
+                        <td><b>Document Checklist</b></td>
+                        <td><b>Actions</b></td>
                     </tr>
                     <tr>
-                        <td><b>City *</b></td>
-                        <td><input type="text" placeholder="Enter City"></td>
-                        <td><b>Postcode *</b></td>
-                        <td><input type="text" placeholder="Enter Postcode"></td>
+                        <td>1</td>
+                        <td>Original copy of your Passport / MYKAD <span class="mandatory">*</span></td>
+                        <td><input type="file" required></td>
                     </tr>
                     <tr>
-                        <td><b>Country *</b></td>
-                        <td><select><option>Select Country</option></select></td>
-                        <td><b>Gender *</b></td>
-                        <td><select><option>Select Gender</option></select></td>
+                        <td>2</td>
+                        <td>Original copy of High School Academic Certificate or English translation <span class="mandatory">*</span></td>
+                        <td><input type="file" required></td>
                     </tr>
                     <tr>
-                        <td><b>Religion *</b></td>
-                        <td><select><option>Select Religion</option></select></td>
-                        <td><b>Status *</b></td>
-                        <td><select><option>Select Status</option></select></td>
+                        <td>3</td>
+                        <td>Original copy of High School Academic Transcript or English translation <span class="mandatory">*</span></td>
+                        <td><input type="file" required></td>
                     </tr>
                     <tr>
-                        <td><b>Birthdate *</b></td>
-                        <td><input type="date"></td>
-                        <td><b>Country of Birth *</b></td>
-                        <td><select><option>Select Country of Birth</option></select></td>
+                        <td>4</td>
+                        <td>Original copy of Highest Academic Certificate or English translation <span class="mandatory">*</span></td>
+                        <td><input type="file" required></td>
                     </tr>
                     <tr>
-                        <td><b>Number of Siblings *</b></td>
-                        <td><input type="text" placeholder="Current Age"></td>
-                        <td><b>Nationality Country *</b></td>
-                        <td><select><option>Nationality Country Based on Your Passport</option></select></td>
+                        <td>5</td>
+                        <td>Original copy of Highest Academic Transcript or English translation <span class="mandatory">*</span></td>
+                        <td><input type="file" required></td>
                     </tr>
                     <tr>
-                        <td><b>Slope La / Account *</b></td>
-                        <td colspan="3">
-                            <textarea placeholder="Please specify your Slope La / slope account email. (Applicable for Applicant who applying Reliability Scholarship Programme)"></textarea>
-                        </td>
+                        <td>6</td>
+                        <td>Original copy of English Proficiency Qualification or Release Letter</td>
+                        <td><input type="file"></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Copy of original scholarship letter (if sponsored)</td>
+                        <td><input type="file"></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Original copy of your father's passport or death certificate</td>
+                        <td><input type="file"></td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Original copy of your mother's passport or death certificate</td>
+                        <td><input type="file"></td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>Original copy of your father's income slip or English translation</td>
+                        <td><input type="file"></td>
+                    </tr>
+                    <tr>
+                        <td>11</td>
+                        <td>Original copy of your mother's income slip or English translation</td>
+                        <td><input type="file"></td>
+                    </tr>
+                    <tr>
+                        <td>12</td>
+                        <td>Copy of utility bill (electricity or water bill) or English translation</td>
+                        <td><input type="file"></td>
+                    </tr>
+                    <tr>
+                        <td>13</td>
+                        <td>Verification letter by one of the referees (in English)</td>
+                        <td><input type="file"></td>
                     </tr>
                 </table>
             </div>
-
-            <div class="form-section">
-                <h3>Personal Statement</h3>
-                <label>Are you transferring from another institution in Malaysia? *</label>
-                <select>
-                    <option>Select</option>
-                    <option>Yes</option>
-                    <option>No</option>
-                </select>
-
-                <label>Do you have any disability, impairment, or long-term medical condition that will affect your studies?</label>
-                <textarea placeholder="If yes, please specify and attach additional information."></textarea>
-
-                <label>Do you have allergies that will affect your studies?</label>
-                <textarea placeholder="If yes, please specify and attach additional information."></textarea>
-            </div>
-
-            <div class="form-section">
-                <h3>Passport Details</h3>
-                <label for="dateOfIssue">Date of Issue *</label>
-                <input type="date" id="dateOfIssue">
-
-                <label for="placeOfIssue">Place of Issue *</label>
-                <input type="text" id="placeOfIssue" placeholder="Enter Place of Issue">
-
-                <label>Are you holding any type of Malaysian Immigration Pass now?</label>
-                <select>
-                    <option>Select</option>
-                    <option>Yes</option>
-                    <option>No</option>
-                </select>
-
-                <label for="dateOfExpiry">Date of Expiry *</label>
-                <input type="date" id="dateOfExpiry">
-            </div>
-
-            <button onclick="window.location.href='academic-info.html'">Save and Proceed</button>
+            <button onclick="window.location.href='declaration-submission.html'">Save and Proceed</button>
         </div>
     </div>
 </body>
