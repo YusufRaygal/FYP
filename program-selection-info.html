@@ -138,6 +138,10 @@
                 <optgroup label="School Of Computing and Informatics">
                     <option>Bachelor of Computer Science (Honours)</option>
                 </optgroup>
+                <optgroup label="Foundation Programmes">
+                    <option>Foundation in Arts</option>
+                    <option>Foundation in Computing</option>
+                </optgroup>
             </select>
             <label>Programme (2):</label>
             <select>
@@ -162,6 +166,10 @@
                 </optgroup>
                 <optgroup label="School Of Computing and Informatics">
                     <option>Bachelor of Computer Science (Honours)</option>
+                </optgroup>
+                <optgroup label="Foundation Programmes">
+                    <option>Foundation in Arts</option>
+                    <option>Foundation in Computing</option>
                 </optgroup>
             </select>
             <label>Programme (3):</label>
@@ -188,6 +196,10 @@
                 <optgroup label="School Of Computing and Informatics">
                     <option>Bachelor of Computer Science (Honours)</option>
                 </optgroup>
+                <optgroup label="Foundation Programmes">
+                    <option>Foundation in Arts</option>
+                    <option>Foundation in Computing</option>
+                </optgroup>
             </select>
             <label>Programme (4):</label>
             <select>
@@ -213,11 +225,25 @@
                 <optgroup label="School Of Computing and Informatics">
                     <option>Bachelor of Computer Science (Honours)</option>
                 </optgroup>
+                <optgroup label="Foundation Programmes">
+                    <option>Foundation in Arts</option>
+                    <option>Foundation in Computing</option>
+                </optgroup>
             </select>
-            <label>Programme Intake:</label>
-            <input type="text" value="2025/2026" disabled>
-            <label>Mode of Studies:</label>
-            <input type="text" value="Full-Time" disabled>
+            <label for="programmeIntake">Programme Intake:</label>
+<select id="programmeIntake">
+    <option value="" disabled selected>Select Programme Intake</option>
+    <option>2025-2026</option>
+    <option>2026-2027</option>
+    <option>2027-2028</option>
+</select>
+
+<label for="modeOfStudies">Mode of Studies:</label>
+<select id="modeOfStudies">
+    <option value="" disabled selected>Select Mode of Studies</option>
+    <option>Full-Time</option>
+    <option>Part-Time</option>
+</select>
             <button onclick="window.location.href='basic-info.html'">Save and Proceed</button>
         </div>
     </div>
