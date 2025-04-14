@@ -49,7 +49,7 @@
             <div class="form-section">
                 <h3>1. High School Qualification</h3>
                 <label>Level *</label>
-                <select>
+                <select title="Select Level">
                     <option>Select Level</option>
                     <option>High School Grade 10 </option>
                     <option> O level </option>
@@ -62,7 +62,7 @@
                 <input type="text" placeholder="Enter School/Institution Address">
 
                 <label>School / Institution Country *</label>
-                <select>
+                <select title="Select School / Institution Country">
                     <option>Select Country</option>
                     <option value="Afghanistan">Afghanistan</option>
                     <option value="Albania">Albania</option>
@@ -276,7 +276,7 @@
             <div class="form-section">
                 <h3>2. Highest Academic Qualification</h3>
                 <label>Certificate *</label>
-                <select>
+                <select title="Select Certificate">
                     <option>Select Certificate</option>
                     <option>Matriculation</option>
                     <option>High School Grade 12</option>
@@ -306,22 +306,22 @@
                 <input type="text" placeholder="Enter School/Institution Name">
 
                 <label>School Start Date *</label>
-                <input type="date">
+                <input type="date" title="Select a date" placeholder="YYYY-MM-DD">
 
                 <label>School Completion Date *</label>
-                <input type="date">
+                <input type="date" title="Select a date" placeholder="YYYY-MM-DD">
             </div>
 
             <div class="form-section">
                 <h3>3. English Proficiency Qualification</h3>
                 <label> Select national language *</label>
-                <select id="englishProficiency" onchange="toggleEnglishQualification()">
+                <select id="englishProficiency" title="Select your national language" onchange="toggleEnglishQualification()">
                     <option value="" disabled selected>Select Status</option>
                     <option value="English">English</option>
                     <option value="Non-English">Non-English</option>
                 </select>
 
-                <div id="englishQualificationFields" style="display: none; margin-top: 10px;">
+                <div id="englishQualificationFields" class="hidden-qualification-fields">
                     <label for="qualificationType">English Qualification Type *</label>
                     <select id="qualificationType">
                         <option value="" disabled selected>Select Qualification</option>
