@@ -1,0 +1,766 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Information | AIU</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #1ABC9C;
+            --accent-color: #3498DB;
+            --dark-color: #1A252F;
+            --light-color: #ECF0F1;
+            --warning-color: #E74C3C;
+            --success-color: #27AE60;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F5F7FA;
+            color: #333;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles (Matches your other pages) */
+       .sidebar {
+            background: var(--primary-color);
+            color: white;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 25px 0;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-container {
+            text-align: center;
+            padding: 0 25px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo-container img {
+            width: 120px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        
+        .logo-container h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--light-color);
+        }
+        
+        .nav-menu {
+            flex-grow: 1;
+            padding: 0 15px;
+            overflow-y: auto;
+        }
+        
+        .nav-menu a {
+            color: var(--light-color);
+            text-decoration: none;
+            display: block;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 5px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .nav-menu a:hover, .nav-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-menu a i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            padding: 30px;
+            background-color: #F5F7FA;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .header h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        /* Form Container */
+        .form-container {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+            margin-bottom: 30px;
+        }
+        
+        .form-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .form-header h2 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .form-header p {
+            color: #7F8C8D;
+            margin: 10px 0 0;
+            font-size: 0.95rem;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        
+        .form-section:last-child {
+            border-bottom: none;
+        }
+        
+        .form-section h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background-color: white;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.2);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 15px;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #16A085;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(26, 188, 156, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(26, 188, 156, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .sidebar-footer {
+            padding: 15px 25px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        /* Financial Info Specific Styles */
+        .reminder {
+            color: var(--warning-color);
+            font-weight: 500;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: rgba(231, 76, 60, 0.1);
+            border-radius: var(--border-radius);
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        /* Notification Styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+
+        .notification {
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: var(--box-shadow);
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--warning-color);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @media (max-width: 992px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                position: relative;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+            
+            .form-row, .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation (Matches your other pages) -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'images/logo.jpg' %}" alt="AIU Logo">
+            <h2>Albukhary International University</h2>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="{% url 'dashboard' %}">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{% url 'program_selection' %}">
+                <i class="fas fa-list-ol"></i> Program Selection
+            </a>
+            <a href="{% url 'basic_info' %}">
+                <i class="fas fa-user-graduate"></i> Student Profile
+            </a>
+            <a href="{% url 'academic_info' %}">
+                <i class="fas fa-book-open"></i> Academic Info
+            </a>
+            <a href="{% url 'financial_info' %}" class="active">
+                <i class="fas fa-wallet"></i> Financial Info
+            </a>
+            <a href="{% url 'document-uploading' %}">
+                <i class="fas fa-cloud-upload-alt"></i> Documents
+            </a>
+            
+            <a href="{% url 'view_status' %}">
+                <i class="fas fa-clipboard-list"></i> Application Status
+            </a>
+            <a href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            © 2025 AIU Student Portal | v3.2.1
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Financial Information</h1>
+        </div>
+        
+        <!-- Form Container -->
+        <div class="form-container">
+            <div class="form-header">
+                <h2>Financial Details and Sponsorship</h2>
+                <p>Please provide your financial information, scholarship details, and parent/guardian information.</p>
+            </div>
+            
+            <form id="financialInfoForm" action="{% url 'save_financial_info' %}" method="post">
+    {% csrf_token %}
+                
+                <!-- Financial Information Section -->
+                <div class="form-section">
+                    <h3>1. Financial Information</h3>
+                    <div class="reminder">
+                        <strong>REMINDER:</strong> This section is mandatory to be filled. Failure to do so may cause your application to be rejected.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="referredByOrg">Are you referred to AIU by an organization or AIU collaborators?</label>
+                        <select class="form-control" id="referredByOrg" name="referred_by_organization" onchange="toggleOrgName()">
+                            <option value="">Select</option>
+                            <option value="yes" {% if existing_info.referred_by_organization == 'yes' %}selected{% endif %}>Yes</option>
+                            <option value="no" {% if existing_info.referred_by_organization == 'no' %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
+                    
+                    <div id="orgNameGroup" class="form-group" style="display: {% if existing_info.referred_by_organization == 'yes' %}block{% else %}none{% endif %};">
+                        <label for="organization_name">Organization Name</label>
+                        <input type="text" class="form-control" id="organization_name" name="organization_name" 
+                               value="{{ existing_info.organization_name|default:'' }}" placeholder="Enter organization name">
+                    </div>
+                </div>
+                
+                <!-- Scholarship Application Section -->
+                <div class="form-section">
+                    <h3>2. Scholarship Application</h3>
+                    <p>Please note that AIU reserves full rights to reject or terminate any application for scholarship that contains plagiarism or fraudulent information without prior notice to the applicant.</p>
+                    
+                    <div class="form-group">
+                        <label for="why_sponsor_essay">1. Why should the Albukhary Foundation sponsor you? (COMPULSORY to complete 150 words)</label>
+                        <textarea class="form-control" id="why_sponsor_essay" name="why_sponsor_essay" required>{{ existing_info.why_sponsor_essay|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="future_impact_essay">2. How will the scholarship impact your future? (COMPULSORY to complete 150 words)</label>
+                        <textarea class="form-control" id="future_impact_essay" name="future_impact_essay" required>{{ existing_info.future_impact_essay|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="suitable_candidate_essay">3. What makes you a suitable and good candidate? (COMPULSORY to complete 150 words)</label>
+                        <textarea class="form-control" id="suitable_candidate_essay" name="suitable_candidate_essay" required>{{ existing_info.suitable_candidate_essay|default:'' }}</textarea>
+                    </div>
+                </div>
+                
+                <!-- Parent's / Legal Guardian Information Section -->
+                <div class="form-section">
+                    <h3>3. Parent's / Legal Guardian Information</h3>
+                    <div class="two-column">
+                        <!-- Parent/Guardian 1 -->
+                        <div>
+                            <div class="form-group">
+                                <label for="parent1_marital_status">Marital Status *</label>
+                                <select class="form-control" id="parent1_marital_status" name="parent1_marital_status" required>
+                                    <option value="">Select Marital Status</option>
+                                    <option value="single" {% if existing_info.parent1_marital_status == 'single' %}selected{% endif %}>Single</option>
+                                    <option value="married" {% if existing_info.parent1_marital_status == 'married' %}selected{% endif %}>Married</option>
+                                    <option value="divorced" {% if existing_info.parent1_marital_status == 'divorced' %}selected{% endif %}>Divorced</option>
+                                    <option value="widowed" {% if existing_info.parent1_marital_status == 'widowed' %}selected{% endif %}>Widowed</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent1_name">Name (Father / Guardian I) *</label>
+                                <input type="text" class="form-control" id="parent1_name" name="parent1_name" 
+                                       value="{{ existing_info.parent1_name|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent1_identity_number">Identity Number *</label>
+                                <input type="text" class="form-control" id="parent1_identity_number" name="parent1_identity_number" 
+                                       value="{{ existing_info.parent1_identity_number|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent1_nationality">Nationality *</label>
+                                <select class="form-control" id="parent1_nationality" name="parent1_nationality" required>
+                                    <option value="">Select Country</option>
+                                    {% for country in countries %}
+                                    <option value="{{ country }}" {% if existing_info.parent1_nationality == country %}selected{% endif %}>{{ country }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent1_phone">Phone Number *</label>
+                                <input type="text" class="form-control" id="parent1_phone" name="parent1_phone" 
+                                       value="{{ existing_info.parent1_phone|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent1_relationship">Relationship *</label>
+                                <select class="form-control" id="parent1_relationship" name="parent1_relationship" required>
+                                    <option value="">Select Relationship</option>
+                                    <option value="father" {% if existing_info.parent1_relationship == 'father' %}selected{% endif %}>Father</option>
+                                    <option value="guardian" {% if existing_info.parent1_relationship == 'guardian' %}selected{% endif %}>Guardian</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent1_occupation">Occupation Type *</label>
+                                <input type="text" class="form-control" id="parent1_occupation" name="parent1_occupation" 
+                                       value="{{ existing_info.parent1_occupation|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent1_salary_usd">Salary (USD) *</label>
+                                <input type="text" class="form-control" id="parent1_salary_usd" name="parent1_salary_usd" 
+                                       value="{{ existing_info.parent1_salary_usd|default:'' }}" required>
+                            </div>
+                        </div>
+                        
+                        <!-- Parent/Guardian 2 -->
+                        <div>
+                            <div class="form-group">
+                                <label for="parent2_marital_status">Marital Status *</label>
+                                <select class="form-control" id="parent2_marital_status" name="parent2_marital_status" required>
+                                    <option value="">Select Marital Status</option>
+                                    <option value="single" {% if existing_info.parent2_marital_status == 'single' %}selected{% endif %}>Single</option>
+                                    <option value="married" {% if existing_info.parent2_marital_status == 'married' %}selected{% endif %}>Married</option>
+                                    <option value="divorced" {% if existing_info.parent2_marital_status == 'divorced' %}selected{% endif %}>Divorced</option>
+                                    <option value="widowed" {% if existing_info.parent2_marital_status == 'widowed' %}selected{% endif %}>Widowed</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent2_name">Name (Mother / Guardian II) *</label>
+                                <input type="text" class="form-control" id="parent2_name" name="parent2_name" 
+                                       value="{{ existing_info.parent2_name|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent2_identity_number">Identity Number *</label>
+                                <input type="text" class="form-control" id="parent2_identity_number" name="parent2_identity_number" 
+                                       value="{{ existing_info.parent2_identity_number|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent2_nationality">Nationality *</label>
+                                <select class="form-control" id="parent2_nationality" name="parent2_nationality" required>
+                                    <option value="">Select Country</option>
+                                    {% for country in countries %}
+                                    <option value="{{ country }}" {% if existing_info.parent2_nationality == country %}selected{% endif %}>{{ country }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent2_phone">Phone Number *</label>
+                                <input type="text" class="form-control" id="parent2_phone" name="parent2_phone" 
+                                       value="{{ existing_info.parent2_phone|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent2_relationship">Relationship *</label>
+                                <select class="form-control" id="parent2_relationship" name="parent2_relationship" required>
+                                    <option value="">Select Relationship</option>
+                                    <option value="mother" {% if existing_info.parent2_relationship == 'mother' %}selected{% endif %}>Mother</option>
+                                    <option value="guardian" {% if existing_info.parent2_relationship == 'guardian' %}selected{% endif %}>Guardian</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent2_occupation">Occupation Type *</label>
+                                <input type="text" class="form-control" id="parent2_occupation" name="parent2_occupation" 
+                                       value="{{ existing_info.parent2_occupation|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="parent2_salary_usd">Salary (USD) *</label>
+                                <input type="text" class="form-control" id="parent2_salary_usd" name="parent2_salary_usd" 
+                                       value="{{ existing_info.parent2_salary_usd|default:'' }}" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reference Section -->
+                <div class="form-section">
+                    <h3>4. Reference</h3>
+                    <div class="two-column">
+                        <!-- Referee 1 -->
+                        <div>
+                            <div class="form-group">
+                                <label for="referee1_name">Referee 1 Name *</label>
+                                <input type="text" class="form-control" id="referee1_name" name="referee1_name" 
+                                       value="{{ existing_info.referee1_name|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referee1_relationship">Relationship *</label>
+                                <input type="text" class="form-control" id="referee1_relationship" name="referee1_relationship" 
+                                       value="{{ existing_info.referee1_relationship|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referee1_phone">Contact Number *</label>
+                                <input type="text" class="form-control" id="referee1_phone" name="referee1_phone" 
+                                       value="{{ existing_info.referee1_phone|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referee1_email">Email *</label>
+                                <input type="email" class="form-control" id="referee1_email" name="referee1_email" 
+                                       value="{{ existing_info.referee1_email|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referee1_address">Address *</label>
+                                <textarea class="form-control" id="referee1_address" name="referee1_address" required>{{ existing_info.referee1_address|default:'' }}</textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Referee 2 -->
+                        <div>
+                            <div class="form-group">
+                                <label for="referee2_name">Referee 2 Name *</label>
+                                <input type="text" class="form-control" id="referee2_name" name="referee2_name" 
+                                       value="{{ existing_info.referee2_name|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referee2_relationship">Relationship *</label>
+                                <input type="text" class="form-control" id="referee2_relationship" name="referee2_relationship" 
+                                       value="{{ existing_info.referee2_relationship|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referee2_phone">Contact Number *</label>
+                                <input type="text" class="form-control" id="referee2_phone" name="referee2_phone" 
+                                       value="{{ existing_info.referee2_phone|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referee2_email">Email *</label>
+                                <input type="email" class="form-control" id="referee2_email" name="referee2_email" 
+                                       value="{{ existing_info.referee2_email|default:'' }}" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="referee2_address">Address *</label>
+                                <textarea class="form-control" id="referee2_address" name="referee2_address" required>{{ existing_info.referee2_address|default:'' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="hasRelativeSponsored">Have any of your real sibling(s) / relative(s) been sponsored by AIU?</label>
+                        <select class="form-control" id="hasRelativeSponsored" name="has_relative_sponsored" onchange="toggleRelativeDetails()">
+                            <option value="">Select</option>
+                            <option value="yes" {% if existing_info.has_relative_sponsored == 'yes' %}selected{% endif %}>Yes</option>
+                            <option value="no" {% if existing_info.has_relative_sponsored == 'no' %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
+                    
+                    <div id="relativeDetailsGroup" class="form-group" style="display: {% if existing_info.has_relative_sponsored == 'yes' %}block{% else %}none{% endif %};">
+                        <label for="relative_details">Relative Details</label>
+                        <textarea class="form-control" id="relative_details" name="relative_details">{{ existing_info.relative_details|default:'' }}</textarea>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save and Proceed
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Function to toggle organization name field
+        function toggleOrgName() {
+            const orgNameGroup = document.getElementById('orgNameGroup');
+            if (document.getElementById('referredByOrg').value === 'yes') {
+                orgNameGroup.style.display = 'block';
+            } else {
+                orgNameGroup.style.display = 'none';
+            }
+        }
+        
+        // Function to toggle relative details field
+        function toggleRelativeDetails() {
+            const relativeDetailsGroup = document.getElementById('relativeDetailsGroup');
+            if (document.getElementById('hasRelativeSponsored').value === 'yes') {
+                relativeDetailsGroup.style.display = 'block';
+            } else {
+                relativeDetailsGroup.style.display = 'none';
+            }
+        }
+        
+        // Initialize form fields on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleOrgName();
+            toggleRelativeDetails();
+        });
+    </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('financialInfoForm');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let container = document.querySelector('.notification-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.className = 'notification-container';
+                    document.body.appendChild(container);
+                }
+
+                const notification = document.createElement('div');
+                notification.className = `notification ${data.success ? 'success' : 'error'}`;
+                notification.innerHTML = `
+                    <i class="fas ${data.success ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                    ${data.message}
+                `;
+                container.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.animation = 'slideIn 0.3s ease-out';
+                }, 10);
+
+                if (data.success && data.redirect_url) {
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url;
+                    }, 2000);
+                } else {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-save"></i> Save and Proceed';
+                }
+
+                setTimeout(() => {
+                    notification.style.animation = 'fadeOut 0.5s ease';
+                    setTimeout(() => notification.remove(), 500);
+                }, 5000);
+            })
+            .catch(err => {
+                alert("Unexpected error occurred");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Save and Proceed';
+            });
+        });
+    }
+});
+</script>
+
+</body>
+</html>
