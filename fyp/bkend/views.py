@@ -249,16 +249,27 @@ from django.contrib.auth.hashers import make_password
 from .models import Registration
 import json
 
-@csrf_exempt  # Disable CSRF for simplicity (enable in production)
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import make_password
+import json
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import make_password
+from .models import Registration
+import json
+
+@csrf_exempt  # Remove in production
 def register_user(request):
     if request.method != "POST":
-        return JsonResponse({"error": "Only POST requests allowed"}, status=405)
+        messages.error(request, "Only POST requests are allowed.")
+        return redirect('registration_form')
 
     try:
-        # Extract data (supports both form-data and JSON)
         data = request.POST if request.POST else json.loads(request.body)
-        
-        # Validate required fields
+
         required_fields = [
             'identity_card', 'first_name', 'last_name', 
             'primary_email', 'country_code', 'contact_number',
@@ -266,19 +277,18 @@ def register_user(request):
         ]
         missing_fields = [field for field in required_fields if not data.get(field)]
         if missing_fields:
-            return JsonResponse(
-                {"error": f"Missing fields: {', '.join(missing_fields)}"}, 
-                status=400
-            )
+            messages.error(request, f"Missing fields: {', '.join(missing_fields)}")
+            return redirect('registration_form')
 
-        # Check for existing user
         if Registration.objects.filter(primary_email=data['primary_email']).exists():
-            return JsonResponse({"error": "Email already registered"}, status=400)
-        if Registration.objects.filter(identity_card=data['identity_card']).exists():
-            return JsonResponse({"error": "Identity card already registered"}, status=400)
+            messages.error(request, "Email already registered")
+            return redirect('registration_form')
 
-        # Create user (profile_pic=None for now)
-        user = Registration(
+        if Registration.objects.filter(identity_card=data['identity_card']).exists():
+            messages.error(request, "Identity card already registered")
+            return redirect('registration_form')
+
+        Registration.objects.create(
             identity_card=data['identity_card'],
             first_name=data['first_name'],
             last_name=data['last_name'],
@@ -286,23 +296,25 @@ def register_user(request):
             secondary_email=data.get('secondary_email', '').lower() or None,
             country_code=data['country_code'],
             contact_number=data['contact_number'],
-            password=make_password(data['password']),  # Hash immediately
+            password=make_password(data['password']),
             applicant_type=data['applicant_type'],
-            application_submitted=False,  # Explicitly set to False
-            submission_date=None,  # Explicitly set to None
-            profile_pic=None  # Skip during registration
+            application_submitted=False,
+            submission_date=None,
+            profile_pic=None
         )
-        user.save()
 
-        return JsonResponse({
-            "success": "User registered!",
-            "user_id": user.identity_card
-        }, status=201)
+        messages.success(request, "Registration successful! You can now login.")
+        return redirect('login')  # or wherever the login view is named
 
     except json.JSONDecodeError:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+        messages.error(request, "Invalid data format.")
+        return redirect('registration_form')
+    
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)
+        messages.error(request, f"Unexpected error: {str(e)}")
+        return redirect('registration_form')
+
+    
 
 # -------------------------
 # USER LOGIN
@@ -1505,3 +1517,226 @@ class ShortlistedApplicationsView(ListView):
 
     def get_queryset(self):
         return Registration.objects.filter(application_status='SHORTLISTED')
+    
+
+
+from django.http import HttpResponse
+from django.views.generic import ListView
+import csv
+from django.http import HttpResponse
+import csv
+from django.utils import timezone
+from django.utils.timesince import timesince
+
+class AcceptedApplicationsView(ListView):
+    model = Registration
+    template_name = 'bkend/accepted_applications.html'
+    context_object_name = 'applications'
+
+    def get_queryset(self):
+        queryset = Registration.objects.filter(
+            application_status='ACCEPTED'
+        ).select_related(
+            'basic_info', 'academic_info'
+        ).prefetch_related(
+            'programselection_set'
+        )
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        if 'download' in request.GET and request.GET['download'] == 'csv':
+            return self.generate_csv()
+        return super().get(request, *args, **kwargs)
+
+    def generate_csv(self):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="accepted_applications_{}.csv"'.format(
+            timezone.now().strftime('%Y%m%d_%H%M')
+        )
+
+        writer = csv.writer(response)
+        # Write headers
+        writer.writerow([
+            'ID', 'Name', 'Gender', 'Age', 'Email', 'Program',
+            'Nationality', 'CGPA', 'Admission Status', 'Accepted Date'
+        ])
+
+        # Write data rows
+        for app in self.get_queryset():
+            program = app.programselection_set.first()
+            
+            # Calculate age
+            age = ''
+            if hasattr(app, 'basic_info') and app.basic_info.birthdate:
+                age = timesince(app.basic_info.birthdate).split(',')[0]  # Gets the largest unit
+
+            writer.writerow([
+                app.identity_card,
+                f"{app.first_name} {app.last_name}",
+                app.basic_info.gender if hasattr(app, 'basic_info') and hasattr(app.basic_info, 'gender') else '',
+                age,
+                app.primary_email,
+                program.first_program if program else '',
+                app.basic_info.nationality if hasattr(app, 'basic_info') and hasattr(app.basic_info, 'nationality') else '',
+                f"{app.academic_info.malaysian_equivalent:.2f}" if hasattr(app, 'academic_info') and app.academic_info.malaysian_equivalent else '',
+                '',  # Empty Admission Status column
+                app.accepted_date.strftime('%Y-%m-%d') if app.accepted_date else ''
+            ])
+
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['today'] = timezone.now().date()
+        return context
+from django.views.generic import TemplateView
+from django.db.models import Count, Q
+from django.db.models.functions import ExtractYear
+from django.utils import timezone
+from .models import Registration, ProgramSelection
+import pandas as pd
+from django.views.generic import TemplateView
+from django.db.models import Count, Q
+from .models import Registration, ProgramSelection  # Adjust based on your actual module path
+
+class ApplicationStatisticsView(TemplateView):
+    template_name = 'bkend/statistics_dashboard.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        queryset = Registration.objects.all()
+        
+        # Status counts
+        context['total_applications'] = int(queryset.count())
+        context['accepted'] = int(queryset.filter(application_status='ACCEPTED').count())
+        context['shortlisted'] = int(queryset.filter(application_status='SHORTLISTED').count())
+        context['rejected'] = int(queryset.filter(application_status='REJECTED').count())
+        context['ineligible'] = int(queryset.exclude(
+            application_status__in=['ACCEPTED', 'SHORTLISTED', 'REJECTED']
+        ).count())
+
+        # Calculate acceptance rate
+        total = context['total_applications']
+        accepted = context['accepted']
+        context['acceptance_rate'] = round((accepted / total) * 100, 2) if total > 0 else 0
+
+        # Gender distribution by status
+        context['gender_by_status'] = self.get_gender_by_status(queryset)
+
+        # Top countries by status
+        context['countries_by_status'] = self.get_countries_by_status(queryset)
+
+        # Simplified program popularity
+        context['program_popularity'] = self.get_simple_program_data()
+
+        return context
+
+    def get_gender_by_status(self, queryset):
+        statuses = ['ACCEPTED', 'SHORTLISTED', 'REJECTED', 'OTHER']
+        genders = ['Male', 'Female', 'Other']
+        
+        data = {status: [] for status in statuses}
+        
+        for status in statuses[:-1]:
+            qs = queryset.filter(application_status=status)
+            for gender in genders:
+                count = qs.filter(basic_info__gender=gender).count()
+                data[status].append({'gender': gender, 'count': int(count)})
+        
+        # For OTHER status
+        qs = queryset.exclude(application_status__in=['ACCEPTED', 'SHORTLISTED', 'REJECTED'])
+        for gender in genders:
+            count = qs.filter(basic_info__gender=gender).count()
+            data['OTHER'].append({'gender': gender, 'count': int(count)})
+        
+        return {
+            'labels': genders,
+            'datasets': [
+                {
+                    'label': 'Accepted',
+                    'data': [item['count'] for item in data['ACCEPTED']],
+                    'backgroundColor': '#28a745'
+                },
+                {
+                    'label': 'Shortlisted',
+                    'data': [item['count'] for item in data['SHORTLISTED']],
+                    'backgroundColor': '#ffc107'
+                },
+                {
+                    'label': 'Rejected',
+                    'data': [item['count'] for item in data['REJECTED']],
+                    'backgroundColor': '#dc3545'
+                },
+                {
+                    'label': 'Other',
+                    'data': [item['count'] for item in data['OTHER']],
+                    'backgroundColor': '#6c757d'
+                }
+            ]
+        }
+
+    def get_countries_by_status(self, queryset):
+        countries = (
+            queryset.exclude(basic_info__nationality__isnull=True)
+            .values('basic_info__nationality')
+            .annotate(total=Count('identity_card'))
+            .order_by('-total')[:10]
+        )
+        
+        statuses = ['ACCEPTED', 'SHORTLISTED', 'REJECTED']
+        data = []
+        
+        for country in countries:
+            country_data = {'country': country['basic_info__nationality']}
+            for status in statuses:
+                count = queryset.filter(
+                    basic_info__nationality=country['basic_info__nationality'],
+                    application_status=status
+                ).count()
+                country_data[status.lower()] = int(count)
+            data.append(country_data)
+        
+        return {
+            'labels': [item['country'] for item in data],
+            'datasets': [
+                {
+                    'label': 'Accepted',
+                    'data': [item['accepted'] for item in data],
+                    'backgroundColor': '#28a745'
+                },
+                {
+                    'label': 'Shortlisted',
+                    'data': [item['shortlisted'] for item in data],
+                    'backgroundColor': '#ffc107'
+                },
+                {
+                    'label': 'Rejected',
+                    'data': [item['rejected'] for item in data],
+                    'backgroundColor': '#dc3545'
+                }
+            ]
+        }
+
+    def get_simple_program_data(self):
+        programs = (
+            ProgramSelection.objects
+            .values('first_program')
+            .annotate(
+                total=Count('user__identity_card'),
+                accepted=Count('user__identity_card', filter=Q(user__application_status='ACCEPTED'))
+            )
+            .order_by('-total')[:10]
+        )
+
+        return {
+            'labels': [p['first_program'] for p in programs],
+            'datasets': [{
+                'label': 'Applications',
+                'data': [p['total'] for p in programs],
+                'backgroundColor': '#007bff'
+            }, {
+                'label': 'Accepted',
+                'data': [p['accepted'] for p in programs],
+                'backgroundColor': '#28a745'
+            }]
+        }
