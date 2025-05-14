@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 from django.conf import settings
 from django.conf.urls.static import static
-
+from .views import AcceptedApplicationsView
+from .views import ApplicationStatisticsView
 
 
 urlpatterns = [
@@ -33,6 +34,8 @@ urlpatterns = [
     path('admin-applications/<str:status>/', views.admin_application_list, name='admin_application_list_filtered'),
     path('admin-application/<str:identity_card>/', views.admin_application_detail, name='admin_application_detail'),
     path('shortlisted-applications/', views.ShortlistedApplicationsView.as_view(), name='shortlisted_applications'),
+    path('accepted-applications/', AcceptedApplicationsView.as_view(), name='accepted_applications'),
+    path('statistics/', ApplicationStatisticsView.as_view(), name='application_statistics'),
    
    
    

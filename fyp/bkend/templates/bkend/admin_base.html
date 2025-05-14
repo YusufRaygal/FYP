@@ -348,7 +348,7 @@
         <!-- Sidebar Navigation -->
         <div class="admin-sidebar">
             <div class="admin-logo">
-                <img src="{% static 'images/logo.jpg' %}" alt="AIU Logo">
+                <img src="{% static 'images/logo.png' %}" alt="AIU Logo">
                 <h3>AIU Admin Portal</h3>
             </div>
             
@@ -362,8 +362,11 @@
                 <a href="{% url 'shortlisted_applications' %}">
                     <i class="fas fa-list-ul"></i> Shortlisted Applications
                 </a>
-                <a href="#">
-                    <i class="fas fa-cog"></i> Settings
+                <a href="{% url 'accepted_applications' %}">
+                    <i class="fas fa-list-ul"></i> Accepted Applications
+                </a>
+                <a href="{% url 'application_statistics' %}">
+                    <i class="fas fa-list-ul"></i> Statistics Dashboard
                 </a>
                 <a href="#">
                     <i class="fas fa-sign-out-alt"></i> Logout

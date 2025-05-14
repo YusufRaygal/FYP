@@ -28,7 +28,13 @@
                     <td><input type="checkbox" name="selected_applications" value="{{ app.id }}"></td>
                     <td>{{ app.first_name }} {{ app.last_name }}</td>
                     <td>{{ app.primary_email }}</td>
-                    <td>{{ app.program_selection.first_program }}</td>
+                    <td>
+                        {% if app.programselection_set.first %}
+                            {{ app.programselection_set.first.first_program }}
+                        {% else %}
+                            No program selected
+                        {% endif %}
+                    </td>
                     <td>{{ app.shortlisted_date|date:"M d, Y" }}</td>
                     <td>
                         <a href="{% url 'admin_application_detail' app.identity_card %}" class="btn btn-outline">
