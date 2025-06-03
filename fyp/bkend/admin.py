@@ -1,5 +1,7 @@
 from django.contrib import admin
-from .models import Registration, ProgramSelection, BasicInfo, AcademicInfo, FinancialInfo, DocumentUpload
+from .models import Registration, ProgramSelection, BasicInfo, AcademicInfo, FinancialInfo, DocumentUpload, PrescreeningCriteria, Country
+from django.db.utils import IntegrityError
+import pycountry
 
 # Register the Registration model
 admin.site.register(Registration)
@@ -11,6 +13,19 @@ admin.site.register(ProgramSelection)
 admin.site.register(BasicInfo)
 admin.site.register(AcademicInfo)
 admin.site.register(FinancialInfo)
+
+# Load countries dynamically into the Country model
+def load_countries():
+    from .models import Country
+    for country in pycountry.countries:
+        try:
+            Country.objects.get_or_create(name=country.name)
+        except IntegrityError:
+            pass  # Skip duplicates
+
+# Call the function to load countries
+load_countries()
+
 from django.contrib import admin
 from django.utils.html import format_html
 from .models import DocumentUpload
@@ -55,3 +70,16 @@ class DocumentUploadAdmin(admin.ModelAdmin):
         return format_html('<br>'.join(links)) if links else "No documents"
     
     document_links.short_description = "Uploaded Documents"
+
+@admin.register(PrescreeningCriteria)
+class PrescreeningCriteriaAdmin(admin.ModelAdmin):
+    list_display = ('name', 'minimum_cgpa', 'minimum_age', 'maximum_age','gender','marital_status')  # Include maximum_age
+    filter_horizontal = ('countries', 'ineligible_countries')  # Enable dropdowns for ManyToMany fields
+    search_fields = ('name',)
+    list_filter = ('minimum_cgpa', 'minimum_age', 'maximum_age', 'marital_status')  # Add maximum_age to filters
+
+@admin.register(Country)
+class CountryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+

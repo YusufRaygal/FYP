@@ -181,19 +181,6 @@ class AcademicInfo(models.Model):
         validators=[MinValueValidator(0)],
         help_text="Original CGPA/Score from your institution"
     )
-    cgpa_scale = models.FloatField(
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0.1)],  # Prevent division by zero
-        help_text="Maximum possible CGPA/Score (e.g., 4.0, 5.0, 10.0)"
-    )
-    malaysian_equivalent = models.FloatField(
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(0), MaxValueValidator(4.0)],
-        help_text="Automatically calculated Malaysian equivalent CGPA (scale 4.0)",
-        db_index=True  # For faster filtering
-    )
     
     institution_name = models.CharField(max_length=255, blank=True, null=True)
     start_date = models.DateField(blank=True, null=True)
@@ -239,34 +226,20 @@ class AcademicInfo(models.Model):
         verbose_name = "Academic Information"
         verbose_name_plural = "Academic Information Records"
         indexes = [
-            models.Index(fields=['malaysian_equivalent']),
             models.Index(fields=['highest_qualification']),
         ]
-        ordering = ['-malaysian_equivalent']  # Default ordering by CGPA
+        ordering = ['-cgpa_score']  # Default ordering by CGPA
     
     def __str__(self):
-        return f"Academic Info for {self.user.first_name} {self.user.last_name} (CGPA: {self.malaysian_equivalent or 'N/A'})"
-    
-    def calculate_malaysian_cgpa(self):
-        """
-        Calculate the Malaysian equivalent CGPA on a 4.0 scale
-        Returns None if calculation isn't possible
-        """
-        if None in (self.cgpa_score, self.cgpa_scale) or self.cgpa_scale == 0:
-            return None
-        
-        raw_value = (self.cgpa_score / self.cgpa_scale) * 4.0
-        return min(4.0, round(raw_value, 2))  # Cap at 4.0 and round
+        return f"Academic Info for {self.user.first_name} {self.user.last_name} (CGPA: {self.cgpa_score or 'N/A'})"
     
     def save(self, *args, **kwargs):
-        """Auto-calculate Malaysian CGPA before saving"""
-        self.malaysian_equivalent = self.calculate_malaysian_cgpa()
         super().save(*args, **kwargs)
     
     def get_cgpa_display(self):
         """Formatted CGPA information for display"""
-        if self.malaysian_equivalent is not None:
-            return f"{self.malaysian_equivalent}/4.0 (Original: {self.cgpa_score}/{self.cgpa_scale})"
+        if self.cgpa_score is not None:
+            return f"{self.cgpa_score}"
         return "Not available"
 
 class FinancialInfo(models.Model):
@@ -408,6 +381,15 @@ class DocumentUpload(models.Model):
     utility_bill = models.FileField(upload_to='documents/utility/', 
                                   blank=True, null=True, 
                                   verbose_name="Utility Bill")
+    house_front_view = models.FileField(upload_to='documents/house/', 
+                                        blank=True, null=True, 
+                                        verbose_name="House Front View")
+    kitchen_view = models.FileField(upload_to='documents/house/', 
+                                    blank=True, null=True, 
+                                    verbose_name="Kitchen View")
+    living_room_view = models.FileField(upload_to='documents/house/', 
+                                        blank=True, null=True, 
+                                        verbose_name="Living Room View")
     referee_verification = models.FileField(upload_to='documents/referee/', 
                                           blank=True, null=True, 
                                           verbose_name="Referee Verification Letter")
@@ -422,3 +404,67 @@ class DocumentUpload(models.Model):
     class Meta:
         verbose_name = "Document Upload"
         verbose_name_plural = "Document Uploads"
+
+class PrescreeningCriteria(models.Model):
+    # Fields for prescreening criteria
+    name = models.CharField(max_length=255, unique=True, help_text="Name of the prescreening criteria")
+    countries = models.ManyToManyField(
+        'Country', 
+        related_name='prescreening_criteria', 
+        blank=True, 
+        help_text="Countries to which this prescreening applies"
+    )
+    minimum_cgpa = models.FloatField(
+        blank=True, 
+        null=True, 
+        validators=[MinValueValidator(0), MaxValueValidator(4.0)],
+        help_text="Minimum CGPA required (scale 4.0)"
+    )
+    minimum_age = models.PositiveIntegerField(
+        blank=True, 
+        null=True, 
+        help_text="Minimum age required"
+    )
+    maximum_age = models.PositiveIntegerField(
+        blank=True, 
+        null=True, 
+        help_text="Minimum age required"
+    )
+    marital_status = models.CharField(
+        max_length=20, 
+        blank=True, 
+        null=True, 
+        help_text="Required marital status (e.g., Single, Married)"
+    )
+    gender = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True,
+        choices=[('Male', 'Male'), ('Female', 'Female')],
+        help_text="Required gender (Male or Female)"
+    )
+    ineligible_countries = models.ManyToManyField(
+        'Country', 
+        related_name='ineligible_prescreening_criteria', 
+        blank=True, 
+        help_text="Countries that are not eligible at all"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Prescreening Criteria"
+        verbose_name_plural = "Prescreening Criteria"
+
+class Country(models.Model):
+    name = models.CharField(max_length=100, unique=True, help_text="Name of the country")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Country"
+        verbose_name_plural = "Countries"

@@ -4,13 +4,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from .views import AcceptedApplicationsView
 from .views import ApplicationStatisticsView
+from .views import admin_logout
 
 
 urlpatterns = [
-    path('', views.login_view, name='login'),  # Login page
-    path('register/', views.registration_form, name='registration_form'),  # Registration form page
-    path('register-user/', views.register_user, name='register_user'),  # Registration form submission
+    path('', views.home, name='home'),  # Root URL (e.g., /)
+    
     path('login/', views.user_login, name='login'),  # Login page
+    path('register/', views.registration_form, name='registration_form'),  # Registration form page
+    path('register-user/', views.register_user, name='register_user'),  # Registration form submission  # Login page
     path('program-selection/', views.program_selection, name='program_selection'),  # Program selection page
     path('save-program-selection/', views.save_program_selection, name='save_program_selection'),  # Save program selection
     path('basic-info/', views.basic_info, name='basic_info'),  # Basic info page
@@ -36,6 +38,10 @@ urlpatterns = [
     path('shortlisted-applications/', views.ShortlistedApplicationsView.as_view(), name='shortlisted_applications'),
     path('accepted-applications/', AcceptedApplicationsView.as_view(), name='accepted_applications'),
     path('statistics/', ApplicationStatisticsView.as_view(), name='application_statistics'),
+     path('grades/', views.grades_view, name='grades'),
+    path('admin-login/', views.admin_login, name='admin_login'),
+    path('admin-logout/', admin_logout, name='admin_logout'),  # Admin logout
+    
    
    
    

@@ -6,7 +6,7 @@ from .models import Registration, ProgramSelection
 from .models import Registration, BasicInfo
 from django.utils import timezone
 from django.contrib.auth import logout as auth_logout
-
+from .models import PrescreeningCriteria, Country
 
 # -------------------------
 # RENDER PAGES
@@ -233,7 +233,39 @@ def logout_view(request):
     messages.success(request, "You have been logged out successfully")
     return redirect('login')
 
-# -------------------------
+def home(request):
+    countries = sorted([country.name for country in pycountry.countries], key=lambda x: x)
+    
+    # Get all prescreening criteria with their country information
+    criteria_list = []
+    for criteria in PrescreeningCriteria.objects.prefetch_related('countries', 'ineligible_countries').all():
+        criteria_list.append({
+            'name': criteria.name,
+            'countries': [c.name for c in criteria.countries.all()],
+            'ineligible_countries': [c.name for c in criteria.ineligible_countries.all()],
+            'minimum_cgpa': criteria.minimum_cgpa,
+            'minimum_age': criteria.minimum_age,
+            'maximum_age': criteria.maximum_age,
+            'marital_status': criteria.marital_status,
+            'gender': criteria.gender
+        })
+    
+    context = {
+        'countries': countries,
+        'prescreening_criteria_json': json.dumps(criteria_list)
+    }
+    
+    return render(request, 'bkend/home.html', context)
+
+
+
+import pycountry
+def grades_view(request):
+    # Fetch all countries using pycountry
+    countries = [country.name for country in pycountry.countries]
+    
+    # Render the template with the countries list
+    return render(request, 'bkend/grades.html', {'countries': countries})
 # USER REGISTRATION
 # -------------------------
 
@@ -260,6 +292,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 from .models import Registration
 import json
+
+from django.core.mail import send_mail
+from django.conf import settings
 
 @csrf_exempt  # Remove in production
 def register_user(request):
@@ -288,7 +323,8 @@ def register_user(request):
             messages.error(request, "Identity card already registered")
             return redirect('registration_form')
 
-        Registration.objects.create(
+        # Create the user
+        user = Registration.objects.create(
             identity_card=data['identity_card'],
             first_name=data['first_name'],
             last_name=data['last_name'],
@@ -303,7 +339,27 @@ def register_user(request):
             profile_pic=None
         )
 
-        messages.success(request, "Registration successful! You can now login.")
+        # Send a welcome email
+        subject = "Welcome to AIU Admission Portal"
+        message = f"""
+Hi {user.first_name},
+
+Thank you for registering on the AIU Admission Portal. We're excited to have you on board!
+
+You can now log in to your account using the email address you registered with:
+Email: {user.primary_email}
+
+If you have any questions, feel free to contact us.
+
+Best regards,
+AIU Admission Team
+"""
+        from_email = settings.DEFAULT_FROM_EMAIL
+        recipient_list = [user.primary_email]
+
+        send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+
+        messages.success(request, "Registration successful! A welcome email has been sent to your email address.")
         return redirect('login')  # or wherever the login view is named
 
     except json.JSONDecodeError:
@@ -766,15 +822,7 @@ def save_academic_info(request):
             academic_info.math_score = request.POST.get('math_score')
             academic_info.highest_qualification = request.POST.get('highest_qualification')
             academic_info.program_name = request.POST.get('program_name')
-
-            try:
-                academic_info.cgpa_score = float(request.POST.get('cgpa_score', 0))
-                academic_info.cgpa_scale = float(request.POST.get('cgpa_scale', 0))
-            except (TypeError, ValueError):
-                return JsonResponse({
-                    'success': False,
-                    'message': "Please enter valid numeric values for CGPA."
-                }, status=400)
+            academic_info.cgpa_score = request.POST.get('cgpa_score')  # Keep only CGPA score
 
             academic_info.institution_name = request.POST.get('institution_name')
             academic_info.start_date = request.POST.get('start_date') or None
@@ -987,6 +1035,9 @@ def save_documents(request):
             handle_upload('father_income', request.FILES.get('father_income'))
             handle_upload('mother_income', request.FILES.get('mother_income'))
             handle_upload('utility_bill', request.FILES.get('utility_bill'))
+            handle_upload('house_front_view', request.FILES.get('house_front_view'))
+            handle_upload('kitchen_view', request.FILES.get('kitchen_view'))
+            handle_upload('living_room_view', request.FILES.get('living_room_view'))
             handle_upload('referee_verification', request.FILES.get('referee_verification'))
             
             # Validate and save
@@ -1303,13 +1354,23 @@ from django.shortcuts import render
 from bkend.models import Registration, ProgramSelection, BasicInfo, AcademicInfo, FinancialInfo, DocumentUpload
 from django.db.models import Count, Q
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render
+from django.db.models import Count, Q
+from .models import Registration
+
+def staff_check(user):
+    return user.is_staff or user.is_superuser
+
+@login_required
+@user_passes_test(staff_check, login_url='admin_login')
 def admin_dashboard(request):
     # Get counts for different application statuses
     status_counts = Registration.objects.aggregate(
         total=Count('identity_card'),
         submitted=Count('identity_card', filter=Q(application_submitted=True)),
         draft=Count('identity_card', filter=Q(application_submitted=False))
-    )  # Closing parenthesis added here
+    )
     
     # Get recent submissions
     recent_submissions = Registration.objects.filter(
@@ -1322,14 +1383,20 @@ def admin_dashboard(request):
     }
     return render(request, 'bkend/admin_dashboard.html', context)
 
-from django.db.models import Q, F, Case, When, Value, IntegerField
+from django.db.models import Q, F, Case, When, IntegerField
 from django.db.models.functions import ExtractYear, ExtractMonth, ExtractDay, Now
 from django.shortcuts import render
 from .models import Registration, BasicInfo, ProgramSelection, AcademicInfo
 from datetime import date
 
+from django.db.models import Q, Case, When, IntegerField
+from django.db.models.functions import ExtractYear, ExtractMonth, ExtractDay, Now
+from datetime import date
+from .models import Registration, BasicInfo, ProgramSelection
+@login_required
+@user_passes_test(staff_check, login_url='admin_login')
 def admin_application_list(request, status='all'):
-    # Base queryset with age calculation
+    # Base queryset with all necessary joins and annotations
     applications = Registration.objects.select_related(
         'basic_info',
         'academic_info',
@@ -1352,14 +1419,14 @@ def admin_application_list(request, status='all'):
             default=F('current_year') - F('birth_year') - 1,
             output_field=IntegerField()
         )
-    ).all()
+    ).distinct()  # Added distinct() to prevent duplicates from joins
 
-    # Status filter
+    # Status filter - FIXED to use exact matches
     if status == 'submitted':
-        applications = applications.filter(application_submitted=True)
+        applications = applications.filter(application_submitted=True)  # Use application_submitted field
         status_label = "Submitted Applications"
     elif status == 'draft':
-        applications = applications.filter(application_submitted=False)
+        applications = applications.filter(application_submitted=False)  # Use application_submitted field
         status_label = "Draft Applications"
     else:
         status_label = "All Applications"
@@ -1378,7 +1445,7 @@ def admin_application_list(request, status='all'):
     nationality = request.GET.get('nationality')
     if nationality:
         applications = applications.filter(
-            basic_info__nationality__icontains=nationality
+            basic_info__nationality__iexact=nationality  # Changed to iexact for exact matching
         )
 
     # Gender filter
@@ -1388,32 +1455,44 @@ def admin_application_list(request, status='all'):
             basic_info__gender__iexact=gender
         )
 
-    # Program filter
+    # Program filter - FIXED to use exact program matches
     program = request.GET.get('program')
     if program:
         applications = applications.filter(
-            programselection__first_program__icontains=program
-        )
+            programselection__first_program__iexact=program  # Changed to iexact
+        ).distinct()
 
     # Age range filter
     min_age = request.GET.get('min_age')
     max_age = request.GET.get('max_age')
     if min_age:
-        applications = applications.filter(age__gte=int(min_age))
+        try:
+            applications = applications.filter(age__gte=int(min_age))
+        except ValueError:
+            pass
     if max_age:
-        applications = applications.filter(age__lte=int(max_age))
+        try:
+            applications = applications.filter(age__lte=int(max_age))
+        except ValueError:
+            pass
 
     # CGPA range filter
     min_cgpa = request.GET.get('min_cgpa')
     max_cgpa = request.GET.get('max_cgpa')
     if min_cgpa:
-        applications = applications.filter(
-            academic_info__malaysian_equivalent__gte=float(min_cgpa)
-        )
+        try:
+            applications = applications.filter(
+                academic_info__cgpa_score__gte=float(min_cgpa)
+            )
+        except ValueError:
+            pass
     if max_cgpa:
-        applications = applications.filter(
-            academic_info__malaysian_equivalent__lte=float(max_cgpa)
-        )
+        try:
+            applications = applications.filter(
+                academic_info__cgpa_score__lte=float(max_cgpa)
+            )
+        except ValueError:
+            pass
 
     # Date submitted range
     date_from = request.GET.get('date_from')
@@ -1423,9 +1502,18 @@ def admin_application_list(request, status='all'):
     if date_to:
         applications = applications.filter(submission_date__lte=date_to)
 
-    # Ordering
+    # Ordering - with fallback to default ordering
     order_by = request.GET.get('order_by', '-submission_date')
-    applications = applications.order_by(order_by)
+    valid_ordering_fields = [
+        'identity_card', 'first_name', 'primary_email', 
+        'basic_info__nationality', 'academic_info__cgpa_score',
+        'submission_date'
+    ]
+    
+    if order_by.lstrip('-') in valid_ordering_fields:
+        applications = applications.order_by(order_by)
+    else:
+        applications = applications.order_by('-submission_date')
 
     # Get distinct values for dropdowns
     gender_values = BasicInfo.objects.exclude(gender__isnull=True)\
@@ -1454,21 +1542,22 @@ def admin_application_list(request, status='all'):
         
         # Choices for dropdowns
         'gender_values': gender_values,
-        'nationality_choices': list(BasicInfo.objects.exclude(nationality__isnull=True)
+        'nationality_choices': BasicInfo.objects.exclude(nationality__isnull=True)
                                   .order_by('nationality')
                                   .values_list('nationality', flat=True)
-                                  .distinct()),
-        'program_choices': list(ProgramSelection.objects.exclude(first_program__isnull=True)
+                                  .distinct(),
+        'program_choices': ProgramSelection.objects.exclude(first_program__isnull=True)
                               .order_by('first_program')
                               .values_list('first_program', flat=True)
-                              .distinct()),
+                              .distinct(),
     }
     
     return render(request, 'bkend/admin_application_list.html', context)
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.utils import timezone
-
+@login_required
+@user_passes_test(staff_check, login_url='admin_login')
 def admin_application_detail(request, identity_card):
     application = get_object_or_404(Registration, identity_card=identity_card)
     program_selection = ProgramSelection.objects.filter(user=application).first()
@@ -1527,6 +1616,7 @@ from django.http import HttpResponse
 import csv
 from django.utils import timezone
 from django.utils.timesince import timesince
+
 
 class AcceptedApplicationsView(ListView):
     model = Registration
@@ -1594,7 +1684,6 @@ from django.db.models import Count, Q
 from django.db.models.functions import ExtractYear
 from django.utils import timezone
 from .models import Registration, ProgramSelection
-import pandas as pd
 from django.views.generic import TemplateView
 from django.db.models import Count, Q
 from .models import Registration, ProgramSelection  # Adjust based on your actual module path
@@ -1740,3 +1829,34 @@ class ApplicationStatisticsView(TemplateView):
                 'backgroundColor': '#28a745'
             }]
         }
+
+from django.contrib.auth import authenticate, login,logout
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
+def admin_login(request):
+    # If user is already authenticated, redirect to dashboard
+    if request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser):
+        return redirect('admin_dashboard')  # Make sure this matches your URL name
+    
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            if user.is_staff or user.is_superuser:  # Check if user has admin privileges
+                login(request, user)
+                return redirect('admin_dashboard')
+            else:
+                messages.error(request, "You don't have admin privileges.")
+        else:
+            messages.error(request, "Invalid username or password.")
+    
+    return render(request, 'bkend/admin_login.html')  # Your login template
+
+def admin_logout(request):
+    logout(request)
+    messages.success(request, "You have been successfully logged out.")
+    return redirect('admin_login')  # Redirect to login page after logout
+
