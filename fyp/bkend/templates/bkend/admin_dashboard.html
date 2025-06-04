@@ -1,0 +1,64 @@
+{% extends "bkend/admin_base.html" %}
+{% load humanize %}
+
+{% block content %}
+<div class="admin-header">
+    <h1>Admission Dashboard</h1>
+</div>
+
+<div class="admin-card">
+    <h2 class="card-title">Application Overview</h2>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <div style="text-align: center;">
+            <h3 style="margin: 0; font-size: 2.5rem; color: var(--primary-color);">{{ status_counts.total|intcomma }}</h3>
+            <p style="color: #7f8c8d;">Total Applications</p>
+        </div>
+        <div style="text-align: center;">
+            <h3 style="margin: 0; font-size: 2.5rem; color: var(--success-color);">{{ status_counts.submitted|intcomma }}</h3>
+            <p style="color: #7f8c8d;">Submitted</p>
+        </div>
+        <div style="text-align: center;">
+            <h3 style="margin: 0; font-size: 2.5rem; color: #F39C12;">{{ status_counts.draft|intcomma }}</h3>
+            <p style="color: #7f8c8d;">Drafts</p>
+        </div>
+    </div>
+</div>
+
+<div class="admin-card">
+    <h2 class="card-title">Recent Submissions</h2>
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Program</th>
+                <th>Submitted</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for app in recent_submissions %}
+            <tr>
+                <td>{{ app.identity_card }}</td>
+                <td>{{ app.first_name }} {{ app.last_name }}</td>
+                <td>{{ app.primary_email }}</td>
+                <td>
+                    {% with app.program_selection.first_program as program %}
+                        {{ program|default:"-" }}
+                    {% endwith %}
+                </td>
+                <td>{{ app.submission_date|date:"M d, Y" }}</td>
+                <td>
+                    <span class="badge badge-success">Submitted</span>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center;">No recent submissions</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

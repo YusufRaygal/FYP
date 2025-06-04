@@ -1,0 +1,973 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admissions Dashboard | AIU</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <style>
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #1ABC9C;
+            --accent-color: #3498DB;
+            --dark-color: #1A252F;
+            --light-color: #ECF0F1;
+            --warning-color: #E74C3C;
+            --success-color: #27AE60;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F5F7FA;
+            color: #333;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background: var(--primary-color);
+            color: white;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 25px 0;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-container {
+            text-align: center;
+            padding: 0 25px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo-container img {
+            width: 120px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        
+        .logo-container h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--light-color);
+        }
+        
+        .nav-menu {
+            flex-grow: 1;
+            padding: 0 15px;
+            overflow-y: auto;
+        }
+        
+        .nav-menu a {
+            color: var(--light-color);
+            text-decoration: none;
+            display: block;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 5px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .nav-menu a:hover, .nav-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-menu a i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            padding: 30px;
+            background-color: #F5F7FA;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .user-info h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .user-info .officer-role {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #7F8C8D;
+        }
+        
+        .user-info .officer-role i {
+            margin-right: 8px;
+            color: var(--accent-color);
+        }
+        
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
+            border-top: 4px solid var(--secondary-color);
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(26, 188, 156, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            margin-bottom: 20px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-right: 10px;
+        }
+        
+        .status-submitted {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+        
+        .status-pending {
+            background: rgba(241, 196, 15, 0.1);
+            color: #F39C12;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+        
+        .status-review {
+            background: rgba(52, 152, 219, 0.1);
+            color: var(--accent-color);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+        
+        .status-rejected {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--warning-color);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+        
+        .status-waitlisted {
+            background: rgba(155, 89, 182, 0.1);
+            color: #9B59B6;
+            border: 1px solid rgba(155, 89, 182, 0.3);
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 18px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #16A085;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(26, 188, 156, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(26, 188, 156, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #C0392B;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        /* Applications Table */
+        .applications-table {
+            width: 100%;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .table-header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+        
+        .table-container {
+            padding: 0 25px 25px;
+        }
+        
+        table.dataTable {
+            width: 100% !important;
+            border-collapse: collapse;
+        }
+        
+        table.dataTable thead th {
+            background: #f8f9fa;
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 12px 15px;
+            text-align: left;
+        }
+        
+        table.dataTable tbody td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+        
+        table.dataTable tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .applicant-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #eee;
+        }
+        
+        /* Filters */
+        .filters-container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-item {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        
+        .filter-item label {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .filter-item select, .filter-item input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            background: white;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                position: relative;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-item {
+                width: 100%;
+            }
+        }
+        
+        /* Notification Styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+        
+        .notification {
+            padding: 12px 20px;
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .notification.error {
+            background-color: var(--warning-color);
+        }
+        
+        .notification.info {
+            background-color: var(--accent-color);
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        /* Auto-hide animation */
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.3s ease;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: var(--primary-color);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .modal-body {
+            padding: 20px;
+        }
+        
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Applicant Details Sections */
+        .applicant-section {
+            margin-bottom: 25px;
+        }
+        
+        .applicant-section h4 {
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-row {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            margin-bottom: 10px;
+        }
+        
+        .detail-label {
+            font-weight: 500;
+            color: #7f8c8d;
+        }
+        
+        .detail-value {
+            color: #333;
+        }
+        
+        .documents-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .document-item {
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            transition: var(--transition);
+        }
+        
+        .document-item:hover {
+            border-color: var(--accent-color);
+        }
+        
+        .document-icon {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        
+        .document-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .document-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'images/logo.jpg' %}" alt="AIU Logo">
+            <h2>AIU Admissions Portal</h2>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="{% url 'admissions_dashboard' %}" class="active">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{% url 'applications_list' %}">
+                <i class="fas fa-list-ul"></i> All Applications
+            </a>
+            <a href="{% url 'pending_review' %}">
+                <i class="fas fa-clock"></i> Pending Review
+            </a>
+            <a href="{% url 'reviewed_applications' %}">
+                <i class="fas fa-check-circle"></i> Reviewed
+            </a>
+            <a href="{% url 'admitted_students' %}">
+                <i class="fas fa-user-graduate"></i> Admitted
+            </a>
+            <a href="{% url 'rejected_applications' %}">
+                <i class="fas fa-times-circle"></i> Rejected
+            </a>
+            <a href="{% url 'waitlisted_applications' %}">
+                <i class="fas fa-hourglass-half"></i> Waitlisted
+            </a>
+            <a href="{% url 'admissions_reports' %}">
+                <i class="fas fa-chart-bar"></i> Reports
+            </a>
+            <a href="{% url 'admissions_settings' %}">
+                <i class="fas fa-cog"></i> Settings
+            </a>
+            <a href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            © 2025 AIU Admissions | v3.2.1
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+        {% if messages %}
+        <div class="notification-container">
+            {% for message in messages %}
+            <div class="notification {% if message.tags %}{{ message.tags }}{% endif %}">
+                <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- Header with User Info -->
+        <div class="header">
+            <div class="user-info">
+                <h1>Admissions Dashboard</h1>
+                <div class="officer-role">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Welcome, {{ user.first_name }} {{ user.last_name }} | {{ user.get_role_display }}</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="{% url 'admissions_reports' %}" class="btn btn-primary">
+                    <i class="fas fa-file-export"></i> Generate Report
+                </a>
+            </div>
+        </div>
+    
+        <!-- Dashboard Stats Cards -->
+        <div class="dashboard-grid">
+            <!-- Total Applications Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h2 class="card-title">Total Applications</h2>
+                </div>
+                
+                <div class="card-content">
+                    <h3 style="font-size: 2rem; margin: 0; color: var(--primary-color);">{{ total_applications }}</h3>
+                    <p style="color: #7f8c8d; margin-top: 5px;">This academic cycle</p>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="{% url 'applications_list' %}" class="btn btn-outline">
+                        <i class="fas fa-eye"></i> View All
+                    </a>
+                </div>
+            </div>
+    
+            <!-- Pending Review Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h2 class="card-title">Pending Review</h2>
+                </div>
+                
+                <div class="card-content">
+                    <h3 style="font-size: 2rem; margin: 0; color: var(--primary-color);">{{ pending_review }}</h3>
+                    <p style="color: #7f8c8d; margin-top: 5px;">Awaiting your action</p>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="{% url 'pending_review' %}" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Start Review
+                    </a>
+                </div>
+            </div>
+
+            <!-- Admission Stats Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-pie"></i>
+                    </div>
+                    <h2 class="card-title">Admission Stats</h2>
+                </div>
+                
+                <div class="card-content">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <div style="font-size: 0.9rem; color: #7f8c8d;">Admitted</div>
+                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--success-color);">{{ admitted_count }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: #7f8c8d;">Rejected</div>
+                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--warning-color);">{{ rejected_count }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: #7f8c8d;">Waitlisted</div>
+                            <div style="font-size: 1.2rem; font-weight: 600; color: #9B59B6;">{{ waitlisted_count }}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9rem; color: #7f8c8d;">Yield Rate</div>
+                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--accent-color);">{{ yield_rate }}%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="{% url 'admissions_reports' %}" class="btn btn-outline">
+                        <i class="fas fa-chart-line"></i> View Trends
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Applications Table -->
+        <div class="applications-table">
+            <div class="table-header">
+                <h2>Recent Applications</h2>
+            </div>
+            
+            <div class="filters-container">
+                <div class="filter-group">
+                    <div class="filter-item">
+                        <label for="program-filter">Program</label>
+                        <select id="program-filter">
+                            <option value="">All Programs</option>
+                            {% for program in programs %}
+                            <option value="{{ program.id }}">{{ program.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="status-filter">Status</label>
+                        <select id="status-filter">
+                            <option value="">All Statuses</option>
+                            <option value="submitted">Submitted</option>
+                            <option value="review">Under Review</option>
+                            <option value="admitted">Admitted</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="waitlisted">Waitlisted</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="date-filter">Submission Date</label>
+                        <select id="date-filter">
+                            <option value="">All Dates</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <label for="search">Search</label>
+                        <input type="text" id="search" placeholder="Search applicants...">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table id="applicationsTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Applicant</th>
+                            <th>Program</th>
+                            <th>Status</th>
+                            <th>Submission Date</th>
+                            <th>Reviewer</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in recent_applications %}
+                        <tr>
+                            <td>{{ application.id }}</td>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="{% if application.applicant.profile_pic %}{{ application.applicant.profile_pic.url }}{% else %}{% static 'images/default_profile.jpg' %}{% endif %}" 
+                                         class="applicant-photo" 
+                                         alt="{{ application.applicant.get_full_name }}">
+                                    <div>
+                                        <div style="font-weight: 500;">{{ application.applicant.get_full_name }}</div>
+                                        <div style="font-size: 0.8rem; color: #7f8c8d;">{{ application.applicant.primary_email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ application.program.name }}</td>
+                            <td>
+                                {% if application.status == 'submitted' %}
+                                    <span class="status-badge status-submitted">
+                                        <i class="fas fa-paper-plane"></i> Submitted
+                                    </span>
+                                {% elif application.status == 'review' %}
+                                    <span class="status-badge status-review">
+                                        <i class="fas fa-search"></i> Under Review
+                                    </span>
+                                {% elif application.status == 'admitted' %}
+                                    <span class="status-badge status-submitted">
+                                        <i class="fas fa-check"></i> Admitted
+                                    </span>
+                                {% elif application.status == 'rejected' %}
+                                    <span class="status-badge status-rejected">
+                                        <i class="fas fa-times"></i> Rejected
+                                    </span>
+                                {% elif application.status == 'waitlisted' %}
+                                    <span class="status-badge status-waitlisted">
+                                        <i class="fas fa-hourglass-half"></i> Waitlisted
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>{{ application.submission_date|date:"M d, Y" }}</td>
+                            <td>
+                                {% if application.reviewed_by %}
+                                    {{ application.reviewed_by.get_full_name }}
+                                {% else %}
+                                    <span style="color: #7f8c8d;">Not assigned</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-outline view-applicant" data-app-id="{{ application.id }}" style="padding: 8px 12px;">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    {% if application.status == 'submitted' %}
+                                        <button class="btn btn-primary start-review" data-app-id="{{ application.id }}" style="padding: 8px 12px;">
+                                            <i class="fas fa-play"></i>
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Applicant Detail Modal -->
+    <div id="applicantModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Applicant Details</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="applicantDetails">
+                <!-- Content will be loaded via AJAX -->
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--accent-color);"></i>
+                    <p>Loading applicant details...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline modal-close">Close</button>
+                <button class="btn btn-primary" id="admitBtn">Admit Applicant</button>
+                <button class="btn btn-danger" id="rejectBtn">Reject</button>
+                <button class="btn" id="waitlistBtn" style="background: #9B59B6; color: white;">Waitlist</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            var table = $('#applicationsTable').DataTable({
+                responsive: true,
+                order: [[4, 'desc']] // Sort by submission date by default
+            });
+            
+            // Apply filters
+            $('#program-filter, #status-filter, #date-filter').on('change', function() {
+                table.draw();
+            });
+            
+            $('#search').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+            
+            // Modal functionality
+            $('.modal-close').on('click', function() {
+                $('#applicantModal').hide();
+            });
+            
+            // View applicant details
+            $('.view-applicant').on('click', function() {
+                var appId = $(this).data('app-id');
+                $('#applicantModal').show();
+                
+                // Load applicant details via AJAX
+                $.ajax({
+                    url: '/admissions/applicant/' + appId + '/',
+                    method: 'GET',
+                    success: function(data) {
+                        $('#applicantDetails').html(data);
+                    },
+                    error: function() {
+                        $('#applicantDetails').html('<div style="text-align: center; padding: 40px; color: var(--warning-color);">' +
+                            '<i class="fas fa-exclamation-triangle"></i>' +
+                            '<p>Failed to load applicant details. Please try again.</p>' +
+                            '</div>');
+                    }
+                });
+            });
+            
+            // Start review
+            $('.start-review').on('click', function() {
+                var appId = $(this).data('app-id');
+                $.ajax({
+                    url: '/admissions/start-review/' + appId + '/',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        if(response.success) {
+                            location.reload();
+                        }
+                    }
+                });
+            });
+            
+            // Auto-hide notifications after 5 seconds
+            setTimeout(function() {
+                $('.notification').animate({
+                    opacity: 0
+                }, 500, function() {
+                    $(this).remove();
+                });
+            }, 5000);
+            
+            // Close modal when clicking outside
+            $(window).on('click', function(e) {
+                if($(e.target).hasClass('modal')) {
+                    $('#applicantModal').hide();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

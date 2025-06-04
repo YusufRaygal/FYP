@@ -1,0 +1,103 @@
+{% extends "bkend/admin_base.html" %}
+
+{% block content %}
+<div class="admin-header">
+    <h1>Accepted Applications</h1>
+    <div class="header-actions">
+        <span class="badge badge-success">{{ applications.count }} Applications</span>
+        <form method="get" class="download-form">
+            <input type="hidden" name="status" value="ACCEPTED">
+            <button type="submit" name="download" value="csv" class="btn btn-primary">
+                <i class="fas fa-download"></i> Download CSV
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Applications Table -->
+<div class="admin-card">
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Age</th>
+                    <th>Email</th>
+                    <th>Program</th>
+                    <th>Nationality</th>
+                    <th>CGPA</th>
+                    <th>Admission Status</th>
+                    <th>Accepted Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app.identity_card }}</td>
+                    <td>{{ app.first_name }} {{ app.last_name }}</td>
+                    <td>{{ app.basic_info.gender|default:"-" }}</td>
+                    <td>
+    {% if app.basic_info.birthdate %}
+        {{ app.basic_info.birthdate|timesince }}  {# Removed :today parameter #}
+    {% else %}
+        -
+    {% endif %}
+</td>
+                    <td>{{ app.primary_email }}</td>
+                    <td>
+                        {% with app.programselection_set.first as program %}
+                            {{ program.first_program|default:"-" }}
+                        {% endwith %}
+                    </td>
+                    <td>{{ app.basic_info.nationality|default:"-" }}</td>
+                    <td>
+                        {% if app.academic_info.cgpa_score %}
+                            {{ app.academic_info.cgpa_score|floatformat:2 }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td class="admission-status"></td>
+                    <td>{{ app.accepted_date|date:"M d, Y" }}</td>
+                    <td>
+                        <a href="{% url 'admin_application_detail' app.identity_card %}" class="btn btn-outline">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="11" class="text-center">No accepted applications found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .download-form {
+        margin-left: auto;
+    }
+    
+    .admin-table th, .admin-table td {
+        vertical-align: middle;
+    }
+    
+    .admission-status {
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    /* Add any additional styling you need */
+</style>
+{% endblock %}

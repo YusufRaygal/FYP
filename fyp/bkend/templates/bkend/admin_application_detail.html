@@ -1,0 +1,369 @@
+{% extends "bkend/admin_base.html" %}
+
+{% block content %}
+<div class="admin-header">
+    <h1>Application Details - {{ app.first_name }} {{ app.last_name }}</h1>
+    <div class="status-container">
+        <span class="status-badge 
+            {% if app.application_status == 'SUBMITTED' %}status-submitted
+            {% elif app.application_status == 'SHORTLISTED' %}status-shortlisted
+            {% elif app.application_status == 'REJECTED' %}status-rejected
+            {% elif app.application_status == 'ACCEPTED' %}status-accepted
+            {% else %}status-draft{% endif %}">
+            {{ app.get_application_status_display }}
+            {% if app.shortlisted_date %}
+                ({{ app.shortlisted_date|date:"M d, Y" }})
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+<!-- Status Management Section -->
+<div class="admin-card status-actions-card">
+    <h3>Application Status Management</h3>
+    <form method="post">
+        {% csrf_token %}
+        <div class="status-buttons">
+            {% if app.application_status != 'SHORTLISTED' and app.application_status != 'ACCEPTED' %}
+            <button type="submit" name="action" value="shortlist" class="btn-shortlist">
+                <i class="fas fa-star"></i> Shortlist for Interview
+            </button>
+            {% endif %}
+            
+            {% if app.application_status != 'REJECTED' %}
+            <button type="submit" name="action" value="reject" class="btn-reject">
+                <i class="fas fa-times"></i> Reject Application
+            </button>
+            {% endif %}
+            
+            {% if app.application_status == 'SHORTLISTED' %}
+            <button type="submit" name="action" value="accept" class="btn-accept">
+                <i class="fas fa-check"></i> Accept Application
+            </button>
+            {% endif %}
+        </div>
+        
+        <div class="status-notes">
+            <label for="notes">Status Notes:</label>
+            <textarea name="notes" id="notes" rows="3" placeholder="Optional notes about this status change">{{ app.status_notes|default:'' }}</textarea>
+        </div>
+    </form>
+</div>
+
+<!-- Registration Information -->
+<div class="admin-card">
+    <h2 class="card-title">Registration Information</h2>
+    <div class="grid-container">
+        <div>
+            <p><strong>ID:</strong> {{ app.identity_card }}</p>
+            <p><strong>Primary Email:</strong> {{ app.primary_email }}</p>
+            <p><strong>Secondary Email:</strong> {{ app.secondary_email|default:"-" }}</p>
+            <p><strong>Phone:</strong> {{ app.country_code }} {{ app.contact_number }}</p>
+            <p><strong>Applicant Type:</strong> {{ app.applicant_type }}</p>
+        </div>
+        <div>
+            <p><strong>Submission Date:</strong> {{ app.submission_date|date:"M d, Y H:i"|default:"Not submitted" }}</p>
+            <p><strong>Profile Picture:</strong> 
+                {% if app.profile_pic %}
+                <a href="{{ app.profile_pic.url }}" target="_blank">View</a>
+                {% else %}Not provided{% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Basic Information -->
+<div class="admin-card">
+    <h2 class="card-title">Personal Information</h2>
+    {% if basic_info %}
+    <div class="grid-container">
+        <div>
+            <h4>Personal Details</h4>
+            <p><strong>Address:</strong> {{ basic_info.address }}</p>
+            <p><strong>City:</strong> {{ basic_info.city }}</p>
+            <p><strong>Postcode:</strong> {{ basic_info.postcode }}</p>
+            <p><strong>Country:</strong> {{ basic_info.country }}</p>
+            <p><strong>Gender:</strong> {{ basic_info.gender }}</p>
+            <p><strong>Religion:</strong> {{ basic_info.religion }}</p>
+            <p><strong>Marital Status:</strong> {{ basic_info.marital_status }}</p>
+        </div>
+        <div>
+            <h4>Birth Information</h4>
+            <p><strong>Birthdate:</strong> {{ basic_info.birthdate|date:"M d, Y" }}</p>
+            <p><strong>Country of Birth:</strong> {{ basic_info.country_of_birth }}</p>
+            <p><strong>Siblings Count:</strong> {{ basic_info.siblings_count }}</p>
+            <p><strong>Nationality:</strong> {{ basic_info.nationality }}</p>
+            <p><strong>Skype Account:</strong> {{ basic_info.skype_account|default:"-" }}</p>
+            
+            <h4>Additional Information</h4>
+            <p><strong>Transferring Institution:</strong> {{ basic_info.transferring_institution|yesno:"Yes,No" }}</p>
+            <p><strong>Disability Info:</strong> {{ basic_info.disability_info|default:"None" }}</p>
+            <p><strong>Allergies Info:</strong> {{ basic_info.allergies_info|default:"None" }}</p>
+        </div>
+        <div>
+            <h4>Passport Details</h4>
+            <p><strong>Passport Issue Date:</strong> {{ basic_info.passport_issue_date|date:"M d, Y" }}</p>
+            <p><strong>Passport Issue Place:</strong> {{ basic_info.passport_issue_place }}</p>
+            <p><strong>Has Malaysian Passport:</strong> {{ basic_info.has_malaysian_pass|yesno:"Yes,No" }}</p>
+            <p><strong>Passport Expiry Date:</strong> {{ basic_info.passport_expiry_date|date:"M d, Y" }}</p>
+        </div>
+    </div>
+    {% else %}
+    <p>No basic information available</p>
+    {% endif %}
+</div>
+
+<!-- Academic Information -->
+<div class="admin-card">
+    <h2 class="card-title">Academic Information</h2>
+    {% if academic_info %}
+    <div class="grid-container">
+        <div>
+            <h4>High School Information</h4>
+            <p><strong>High School Level:</strong> {{ academic_info.get_high_school_level_display|default:"-" }}</p>
+            <p><strong>School Name:</strong> {{ academic_info.high_school_name|default:"-" }}</p>
+            <p><strong>School Address:</strong> {{ academic_info.high_school_address|default:"-" }}</p>
+            <p><strong>School Country:</strong> {{ academic_info.high_school_country|default:"-" }}</p>
+            <p><strong>English Score:</strong> {{ academic_info.english_score|default:"-" }}</p>
+            <p><strong>Math Score:</strong> {{ academic_info.math_score|default:"-" }}</p>
+        </div>
+        <div>
+            <h4>Highest Qualification</h4>
+            <p><strong>Qualification:</strong> {{ academic_info.get_highest_qualification_display|default:"-" }}</p>
+            <p><strong>Program Name:</strong> {{ academic_info.program_name|default:"-" }}</p>
+            <p><strong>CGPA:</strong> {{ academic_info.get_cgpa_display|default:"-" }}</p>
+            <p><strong>Institution:</strong> {{ academic_info.institution_name|default:"-" }}</p>
+            <p><strong>Start Date:</strong> {{ academic_info.start_date|date:"M d, Y"|default:"-" }}</p>
+            <p><strong>Completion Date:</strong> {{ academic_info.completion_date|date:"M d, Y"|default:"-" }}</p>
+        </div>
+        <div>
+            <h4>Language Proficiency</h4>
+            <p><strong>National Language:</strong> {{ academic_info.get_national_language_display|default:"-" }}</p>
+            <p><strong>English Test:</strong> {{ academic_info.get_english_test_type_display|default:"-" }}</p>
+            <p><strong>Test Year:</strong> {{ academic_info.test_year|default:"-" }}</p>
+            <p><strong>Band Score:</strong> {{ academic_info.band_score|default:"-" }}</p>
+        </div>
+    </div>
+    {% else %}
+    <p>No academic information available</p>
+    {% endif %}
+</div>
+
+<!-- Program Selection -->
+<div class="admin-card">
+    <h2 class="card-title">Program Selection</h2>
+    {% if program_selection %}
+    <div class="grid-container">
+        <div>
+            <h4>Program Choices</h4>
+            <p><strong>1st Choice:</strong> {{ program_selection.first_program }}</p>
+            <p><strong>2nd Choice:</strong> {{ program_selection.second_program|default:"-" }}</p>
+            <p><strong>3rd Choice:</strong> {{ program_selection.third_program|default:"-" }}</p>
+            <p><strong>4th Choice:</strong> {{ program_selection.fourth_program|default:"-" }}</p>
+        </div>
+        <div>
+            <h4>Study Details</h4>
+            <p><strong>Intake Year:</strong> {{ program_selection.intake_year }}</p>
+            <p><strong>Study Mode:</strong> {{ program_selection.study_mode }}</p>
+        </div>
+    </div>
+    {% else %}
+    <p>No program selection information available</p>
+    {% endif %}
+</div>
+
+<!-- Financial Information -->
+<div class="admin-card">
+    <h2 class="card-title">Financial Information</h2>
+    {% if financial_info %}
+    <div class="grid-container">
+        <div>
+            <h4>Scholarship Information</h4>
+            <p><strong>Scholarship Type:</strong> {{ financial_info.get_scholarship_type_display|default:"None" }}</p>
+            <p><strong>Referred by Organization:</strong> {{ financial_info.referred_by_organization|yesno:"Yes,No" }}</p>
+            <p><strong>Organization Name:</strong> {{ financial_info.organization_name|default:"-" }}</p>
+            
+            <h4>Parent/Guardian 1</h4>
+            <p><strong>Name:</strong> {{ financial_info.parent1_name|default:"-" }}</p>
+            <p><strong>Relationship:</strong> {{ financial_info.parent1_relationship|default:"-" }}</p>
+            <p><strong>Occupation:</strong> {{ financial_info.parent1_occupation|default:"-" }}</p>
+            <p><strong>Salary (USD):</strong> {{ financial_info.parent1_salary_usd|default:"-" }}</p>
+        </div>
+        <div>
+            <h4>Parent/Guardian 2</h4>
+            <p><strong>Name:</strong> {{ financial_info.parent2_name|default:"-" }}</p>
+            <p><strong>Relationship:</strong> {{ financial_info.parent2_relationship|default:"-" }}</p>
+            <p><strong>Occupation:</strong> {{ financial_info.parent2_occupation|default:"-" }}</p>
+            <p><strong>Salary (USD):</strong> {{ financial_info.parent2_salary_usd|default:"-" }}</p>
+            
+            <h4>References</h4>
+            <p><strong>Referee 1:</strong> {{ financial_info.referee1_name|default:"-" }}</p>
+            <p><strong>Referee 2:</strong> {{ financial_info.referee2_name|default:"-" }}</p>
+        </div>
+        <div>
+            <h4>Additional Information</h4>
+            <p><strong>Has Relative Sponsored:</strong> {{ financial_info.has_relative_sponsored|yesno:"Yes,No" }}</p>
+            <p><strong>Relative Details:</strong> {{ financial_info.relative_details|default:"None" }}</p>
+            
+            <h4>Scholarship Essays</h4>
+            <p><strong>Why Sponsor:</strong> {{ financial_info.why_sponsor_essay|truncatewords:20|default:"Not provided" }}</p>
+            <p><strong>Future Impact:</strong> {{ financial_info.future_impact_essay|truncatewords:20|default:"Not provided" }}</p>
+            <p><strong>Suitable Candidate:</strong> {{ financial_info.suitable_candidate_essay|truncatewords:20|default:"Not provided" }}</p>
+        </div>
+    </div>
+    {% else %}
+    <p>No financial information available</p>
+    {% endif %}
+</div>
+
+<!-- Documents -->
+<div class="admin-card">
+    <h2 class="card-title">Documents</h2>
+    {% if documents %}
+    <div class="grid-container">
+        <div>
+            <h4>Identification</h4>
+            <p><strong>Passport/MYKAD:</strong> 
+                {% if documents.passport_mykad %}
+                <a href="{{ documents.passport_mykad.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            
+            <h4>High School</h4>
+            <p><strong>Certificate:</strong> 
+                {% if documents.high_school_certificate %}
+                <a href="{{ documents.high_school_certificate.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Transcript:</strong> 
+                {% if documents.high_school_transcript %}
+                <a href="{{ documents.high_school_transcript.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+        </div>
+        <div>
+            <h4>Highest Education</h4>
+            <p><strong>Certificate:</strong> 
+                {% if documents.highest_certificate %}
+                <a href="{{ documents.highest_certificate.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Transcript:</strong> 
+                {% if documents.highest_transcript %}
+                <a href="{{ documents.highest_transcript.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            
+            <h4>English Proficiency</h4>
+            <p><strong>Test Results:</strong> 
+                {% if documents.english_proficiency %}
+                <a href="{{ documents.english_proficiency.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+        </div>
+        <div>
+            <h4>Financial Documents</h4>
+            <p><strong>Scholarship Letter:</strong> 
+                {% if documents.scholarship_letter %}
+                <a href="{{ documents.scholarship_letter.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Father's Passport:</strong> 
+                {% if documents.father_passport %}
+                <a href="{{ documents.father_passport.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Mother's Passport:</strong> 
+                {% if documents.mother_passport %}
+                <a href="{{ documents.mother_passport.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Father's Income:</strong> 
+                {% if documents.father_income %}
+                <a href="{{ documents.father_income.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Mother's Income:</strong> 
+                {% if documents.mother_income %}
+                <a href="{{ documents.mother_income.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Utility Bill:</strong> 
+                {% if documents.utility_bill %}
+                <a href="{{ documents.utility_bill.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Referee Letter:</strong> 
+                {% if documents.referee_verification %}
+                <a href="{{ documents.referee_verification.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>House Front View:</strong> 
+                {% if documents.house_front_view %}
+                <a href="{{ documents.house_front_view.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Kitchen View:</strong> 
+                {% if documents.kitchen_view %}
+                <a href="{{ documents.kitchen_view.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            <p><strong>Living Room View:</strong> 
+                {% if documents.living_room_view %}
+                <a href="{{ documents.living_room_view.url }}" target="_blank">View</a>
+                {% else %}Not uploaded{% endif %}
+            </p>
+            
+        </div>
+    </div>
+    {% else %}
+    <p>No documents uploaded</p>
+    {% endif %}
+</div>
+
+<style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 15px;
+    }
+    
+    .admin-card {
+        margin-bottom: 25px;
+    }
+    
+    .card-title {
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    
+    h4 {
+        margin-top: 15px;
+        margin-bottom: 10px;
+        color: #555;
+    }
+    
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+    
+    .status-submitted { background-color: #d4edda; color: #155724; }
+    .status-shortlisted { background-color: #fff3cd; color: #856404; }
+    .status-rejected { background-color: #f8d7da; color: #721c24; }
+    .status-accepted { background-color: #cce5ff; color: #004085; }
+    .status-draft { background-color: #e2e3e5; color: #383d41; }
+    
+    .btn-shortlist { background-color: #ffc107; color: #212529; }
+    .btn-reject { background-color: #dc3545; color: white; }
+    .btn-accept { background-color: #28a745; color: white; }
+    
+    .status-actions-card {
+        background-color: #f8f9fa;
+        border-left: 4px solid #6c757d;
+    }
+</style>
+{% endblock %}

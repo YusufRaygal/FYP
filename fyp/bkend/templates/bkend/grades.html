@@ -1,0 +1,982 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIU Online Application | AlBukhary International University</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-gold: #FFD700;
+            --accent-teal: #008080;
+            --light-bg: #F8F9FA;
+            --dark-text: #333333;
+            --white: #FFFFFF;
+            --error-red: #E74C3C;
+            --success-green: #2ECC71;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            position: relative;
+            min-height: 100vh;
+            padding-bottom: 250px;
+        }
+        
+        /* Header and other existing styles remain the same */
+        
+        /* Eligibility Form Styles */
+        .eligibility-container {
+            width: 400px;
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            animation: fadeInRight 1s ease;
+        }
+        
+        .course-grade {
+            margin-bottom: 15px;
+        }
+        
+        .course-grade label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--primary-blue);
+        }
+        
+        .course-grade select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .add-course-btn {
+            background-color: var(--accent-teal);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .add-course-btn:hover {
+            background-color: #006666;
+        }
+
+        /* Form group styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input, 
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .convert-button {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .convert-button:hover {
+            background-color: #002244;
+        }
+
+        /* Section styling */
+        section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Hidden elements */
+        [style*="display: none"] {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="grades-container">
+            <h2>CGPA Conversion</h2>
+            <form id="gradesForm">
+                <div class="form-group">
+                    <label for="country">Country of Origin</label>
+                    <select id="country" required onchange="handleCountryChange()">
+                        <option value="">Select your country</option>
+                        {% if countries %}
+                            {% for country in countries %}
+                                <option value="{{ country }}">{{ country }}</option>
+                            {% endfor %}
+                        {% else %}
+                            <option value="" disabled>No countries available</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div id="standardizedFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="obtainedMarks">Marks Obtained</label>
+                        <input type="number" id="obtainedMarks" placeholder="Enter obtained marks" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="totalMarks">Total Marks</label>
+                        <input type="number" id="totalMarks" placeholder="Enter total marks" min="1">
+                    </div>
+                    <button type="button" class="convert-button" onclick="convertCgpa()">Convert CGPA</button>
+                </div>
+                <div id="manualCalculationMessage" style="display: none;">
+                    <p>Your country's grading system is not yet available. Please calculate your CGPA manually or contact the admission unit for assistance.</p>
+                </div>
+            </form>
+        </section>
+
+        <section id="malaysiaGrades">
+            <h3>Malaysian Grading System</h3>
+            <div id="malaysiaGradesContainer"></div>
+            <button type="button" class="add-course-btn" onclick="addCourseField('malaysia')">Add Course</button>
+        </section>
+
+        <section id="westAfricaGrades">
+            <h3>West African Grading System</h3>
+            <div id="westAfricaGradesContainer"></div>
+            <button type="button" class="add-course-btn" onclick="addCourseField('westAfrica')">Add Course</button>
+        </section>
+
+        <section id="sriLankaGrades">
+            <h3>Sri Lankan Grading System</h3>
+            <div class="form-group">
+                <label for="sriLankaExamType">Exam Type:</label>
+                <select id="sriLankaExamType" onchange="handleSriLankaExamTypeChange()">
+                    <option value="olevel">O-Level</option>
+                    <option value="alevel">A-Level</option>
+                </select>
+            </div>
+            <div id="sriLankaOLvlContainer"></div>
+            <div id="sriLankaALvlContainer"></div>
+            <button type="button" class="add-course-btn" onclick="addSriLankaCourseField(document.getElementById('sriLankaExamType').value)">Add Subject</button>
+        </section>
+
+        <section id="frenchGrades">
+            <h3>French Grading System</h3>
+            <div id="frenchGradesContainer"></div>
+            <button type="button" class="add-course-btn" onclick="addFrenchCourseField()">Add Course</button>
+        </section>
+
+        <section id="myanmarGrades">
+            <h3>Myanmar Grading System</h3>
+            <div id="myanmarGradesContainer"></div>
+            <button type="button" class="add-course-btn" onclick="addMyanmarCourseField()">Add Course</button>
+        </section>
+
+        <section id="nepalGrades">
+            <h3>Nepal Grading System</h3>
+            <div id="nepalGradesContainer"></div>
+            <button type="button" class="add-course-btn" onclick="addNepalCourseField()">Add Course</button>
+        </section>
+
+        <section id="bhutanGrades">
+            <h3>Bhutan Grading System</h3>
+            <div class="form-group">
+                <label for="bhutanGradingSystem">Grading System:</label>
+                <select id="bhutanGradingSystem" onchange="handleBhutanGradingSystemChange()">
+                    <option value="scale1-9">Scale 1-9</option>
+                    <option value="marks">Marks</option>
+                </select>
+            </div>
+            <div id="bhutanScaleGradesContainer"></div>
+            <div id="bhutanMarksGradesContainer">
+                <div class="form-group">
+                    <label for="bhutanMarksScale">Marks Scale:</label>
+                    <select id="bhutanMarksScale" onchange="handleBhutanMarksScaleChange()">
+                        <option value="100">100-point scale</option>
+                        <option value="800">800-point scale</option>
+                    </select>
+                </div>
+            </div>
+            <button type="button" class="add-course-btn" id="bhutanScaleBtn" onclick="addBhutanScaleCourseField()">Add Scale Course</button>
+            <button type="button" class="add-course-btn" id="bhutanMarksBtn" onclick="addBhutanMarksCourseField()">Add Marks Course</button>
+        </section>
+
+        <section id="vietnamGrades">
+            <h3>Vietnam Grading System</h3>
+            <div id="vietnamGradesContainer"></div>
+            <button type="button" class="add-course-btn" onclick="addVietnamCourseField()">Add Course</button>
+        </section>
+
+        <section id="tajikGrades">
+            <h3>Tajikistan/Uzbekistan/Kosovo/Bosnia Grading System</h3>
+            <div id="tajikGradesContainer"></div>
+            <button type="button" class="add-course-btn" onclick="addTajikCourseField()">Add Course</button>
+        </section>
+
+        <section id="standardizedGrades">
+            <h3>Standardized Grading System</h3>
+            <p>Please enter your grades manually.</p>
+        </section>
+
+        <section id="cgpaField">
+            <h3>CGPA Field</h3>
+            <p>Please calculate your CGPA manually.</p>
+        </section>
+
+        <section id="calculatedCgpaField">
+            <h3>Calculated CGPA</h3>
+            <p>Your calculated CGPA will appear here.</p>
+        </section>
+    </main>
+
+    <script>
+        // Grade mapping systems
+        const gradeSystems = {
+            malaysia: {
+                name: "Malaysian",
+                grades: {
+                    "A+": 4,
+                    "A": 3.75,
+                    "A-": 3.67,
+                    "B+": 3.33,
+                    "B": 3,
+                    "C+": 2.67,
+                    "C": 2.33
+                }
+            },
+            westAfrica: {
+                name: "West African",
+                grades: {
+                    "A1": 4,
+                    "B2": 3.75,
+                    "B3": 3.67,
+                    "C4": 3.33,
+                    "C5": 3,
+                    "C6": 2.67,
+                    "D7": 2.33,
+                    "E8": 2,
+                    "F9": 0
+                },
+                countries: ["Nigeria", "Ghana", "Liberia", "Sierra Leone", "Gambia"]
+            },
+            sriLanka: {
+                name: "Sri Lankan",
+                olevel: {
+                    "A": 4,
+                    "B": 3.5,
+                    "C": 3,
+                    "S": 2.5,
+                    "W": 1
+                },
+                alevel: {
+                    "A": 4,
+                    "B": 3.5,
+                    "C": 3,
+                    "S": 3.33,
+                    "W": 1
+                }
+            },
+            french: {
+                name: "French-system",
+                countries: ["Guinea", "Algeria", "Morocco", "Chad"],
+                grades: {
+                    "18-20": { 
+                        points: 4.0, 
+                        letter: "A*", 
+                        desc: "Très Honorable avec Felicitations du Jury",
+                        writtenGrade: "Highest Honors",
+                        percentage: "90-100"
+                    },
+                    "16-17.99": { 
+                        points: 3.7, 
+                        letter: "A", 
+                        desc: "Très Bien",
+                        writtenGrade: "Very Good - Highest Honors",
+                        percentage: "80-89"
+                    },
+                    "14-15.99": { 
+                        points: 3.7,
+                        letter: "A-", 
+                        desc: "Bien",
+                        writtenGrade: "Good - High Honors",
+                        percentage: "70-79"
+                    },
+                    "12-13.99": { 
+                        points: 3.0, 
+                        letter: "B", 
+                        desc: "Assez Bien",
+                        writtenGrade: "Fairly Good - Honors",
+                        percentage: "60-69"
+                    },
+                    "10-11.99": { 
+                        points: 2.0, 
+                        letter: "C", 
+                        desc: "Passable",
+                        writtenGrade: "Satisfactory",
+                        percentage: "50-59"
+                    },
+                    "0-9.99": { 
+                        points: 0.0, 
+                        letter: "F", 
+                        desc: "Fail",
+                        writtenGrade: "Fail",
+                        percentage: "0-49"
+                    }
+                }
+            },
+            myanmar: {
+                name: "Myanmar",
+                grades: {
+                    "90-100": { points: 4.0, grade: "Distinction", desc: "First Division" },
+                    "80-89": { points: 3.7, grade: "Excellent", desc: "First Division" },
+                    "70-79": { points: 3.5, grade: "Very Good", desc: "First Division" },
+                    "60-69": { points: 3.3, grade: "Good", desc: "Second Division" },
+                    "50-59": { points: 2.7, grade: "Fair", desc: "Second Division" },
+                    "40-49": { points: 2.5, grade: "Pass", desc: "Third Division" },
+                    "0-39": { points: 0, grade: "Fail", desc: "Fail" }
+                }
+            },
+            nepal: {
+                name: "Nepal",
+                grades: {
+                    "90-100": { points: 4.0, grade: "A+", desc: "OUTSTANDING" },
+                    "80-89": { points: 3.7, grade: "A", desc: "EXCELLENT" },
+                    "70-79": { points: 3.3, grade: "B+", desc: "VERY GOOD" },
+                    "60-69": { points: 3.0, grade: "B", desc: "GOOD" },
+                    "50-59": { points: 2.33, grade: "C/C+", desc: "SATISFACTORY" },
+                    "40-49": { points: 2.0, grade: "Pass", desc: "ACCEPTABLE" },
+                    "0-39": { points: 1.67, grade: "Fail", desc: "FAIL" }
+                }
+            },
+            bhutan: {
+                name: "Bhutan",
+                scale1to9: {
+                    "1-2": { points: 4.0, grade: "A", desc: "Excellent" },
+                    "3-5": { points: 3.5, grade: "B", desc: "Good" },
+                    "6-7": { points: 3.0, grade: "C", desc: "Satisfactory" },
+                    "8-9": { points: 0.0, grade: "F", desc: "Fail" }
+                },
+                marks: {
+                    "100": {
+                        "90-100": { points: 4.0, grade: "A+", desc: "Outstanding" },
+                        "80-89": { points: 3.7, grade: "A", desc: "Excellent" },
+                        "70-79": { points: 3.3, grade: "B+", desc: "Very Good" },
+                        "60-69": { points: 3.0, grade: "B", desc: "Good" },
+                        "50-59": { points: 2.33, grade: "C/C+", desc: "Satisfactory" },
+                        "40-49": { points: 2.0, grade: "Pass", desc: "Acceptable" },
+                        "0-39": { points: 0.0, grade: "F", desc: "Fail" }
+                    },
+                    "800": {
+                        "720-800": { points: 4.0, grade: "A+", desc: "Outstanding" },
+                        "640-719": { points: 3.7, grade: "A", desc: "Excellent" },
+                        "560-639": { points: 3.3, grade: "B+", desc: "Very Good" },
+                        "480-559": { points: 3.0, grade: "B", desc: "Good" },
+                        "400-479": { points: 2.33, grade: "C/C+", desc: "Satisfactory" },
+                        "320-399": { points: 2.0, grade: "Pass", desc: "Acceptable" },
+                        "0-319": { points: 0.0, grade: "F", desc: "Fail" }
+                    }
+                }
+            },
+            vietnam: {
+                name: "Vietnam",
+                grades: {
+                    "9.00-10.00": { desc: "Outstanding (Xuất sắc)", letter: "A+", points: 4.0 },
+                    "8.00-8.99": { desc: "Excellent (Giỏi)", letter: "A", points: 3.5 },
+                    "7.00-7.99": { desc: "Good (Khá)", letter: "B+", points: 3.0 },
+                    "6.00-6.99": { desc: "Fairly Good (Trung bình khá)", letter: "B", points: 2.5 },
+                    "5.00-5.99": { desc: "Average (Trung bình)", letter: "C", points: 2.0 },
+                    "0.00-4.99-D": { desc: "Fail (Không đạt)", letter: "D", points: 1.0 },
+                    "0.00-4.99-F": { desc: "Fail (Không)", letter: "F", points: 0.0 }
+                }
+            },
+            tajik: {
+                name: "Tajikistan/Uzbekistan/Kosovo/Bosnia",
+                grades: {
+                    "5": { desc: "Excellent (Аъло)", letter: "A", points: 4.0 },
+                    "4.00-4.99": { desc: "Good (Хуб)", letter: "B", points: 3.0 },
+                    "3.00-3.99": { desc: "Satisfactory (Қаноатбахш)", letter: "C", points: 2.0 },
+                    "0.00-2.99": { desc: "FAIL (BAD)", letter: "F", points: 0.0 }
+                }
+            }
+        };
+
+        // Initialize form on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Hide all grading system sections initially
+            document.querySelectorAll('section[id$="Grades"]').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById('cgpaField').style.display = 'none';
+            document.getElementById('calculatedCgpaField').style.display = 'none'; // Ensure no message is displayed on load
+            document.getElementById('manualCalculationMessage').style.display = 'none'; // Hide manual calculation message initially
+            
+            // Set up event listeners
+            document.getElementById('country').addEventListener('change', handleCountryChange);
+            document.getElementById('sriLankaExamType').addEventListener('change', handleSriLankaExamTypeChange);
+            document.getElementById('bhutanGradingSystem').addEventListener('change', handleBhutanGradingSystemChange);
+            document.getElementById('bhutanMarksScale').addEventListener('change', handleBhutanMarksScaleChange);
+            
+            // Initialize Bhutan grading system
+            handleBhutanGradingSystemChange();
+        });
+
+        // Convert marks to CGPA
+        function convertCgpa() {
+            const obtained = parseFloat(document.getElementById('obtainedMarks').value);
+            const total = parseFloat(document.getElementById('totalMarks').value);
+            const calculatedCgpaField = document.getElementById('calculatedCgpaField');
+
+            if (!isNaN(obtained) && !isNaN(total) && total > 0) {
+                const cgpa = ((obtained / total) * 4).toFixed(2);
+
+                // Update the calculated CGPA field
+                calculatedCgpaField.innerHTML = `
+                    <h3>Calculated CGPA</h3>
+                    <p>Your calculated CGPA is: <strong>${cgpa}</strong></p>
+                `;
+                calculatedCgpaField.style.display = 'block';
+            } else {
+                // Clear the calculated CGPA field and show an error
+                calculatedCgpaField.innerHTML = `
+                    <h3>Calculated CGPA</h3>
+                    <p style="color: var(--error-red);">Invalid marks entered. Please try again.</p>
+                `;
+                calculatedCgpaField.style.display = 'block';
+            }
+        }
+
+        // Handle country selection change
+        function handleCountryChange() {
+            const country = document.getElementById('country').value;
+            const standardizedFields = document.getElementById('standardizedFields');
+            const manualCalculationMessage = document.getElementById('manualCalculationMessage');
+            const calculatedCgpaField = document.getElementById('calculatedCgpaField');
+            const sections = {
+                malaysia: document.getElementById('malaysiaGrades'),
+                westAfrica: document.getElementById('westAfricaGrades'),
+                sriLanka: document.getElementById('sriLankaGrades'),
+                french: document.getElementById('frenchGrades'),
+                myanmar: document.getElementById('myanmarGrades'),
+                nepal: document.getElementById('nepalGrades'),
+                bhutan: document.getElementById('bhutanGrades'),
+                vietnam: document.getElementById('vietnamGrades'),
+                tajik: document.getElementById('tajikGrades'),
+            };
+
+            // Hide all sections and reset fields
+            Object.values(sections).forEach(section => {
+                if (section) section.style.display = 'none';
+            });
+            standardizedFields.style.display = 'none';
+            manualCalculationMessage.style.display = 'none';
+            calculatedCgpaField.style.display = 'none';
+
+            // Show appropriate section or message
+            if (country === 'Malaysia') {
+                sections.malaysia.style.display = 'block';
+            } else if (gradeSystems.westAfrica.countries.includes(country)) {
+                sections.westAfrica.style.display = 'block';
+            } else if (country === 'Sri Lanka') {
+                sections.sriLanka.style.display = 'block';
+                handleSriLankaExamTypeChange();
+            } else if (gradeSystems.french.countries.includes(country)) {
+                sections.french.style.display = 'block';
+            } else if (country === 'Myanmar') {
+                sections.myanmar.style.display = 'block';
+            } else if (country === 'Nepal') {
+                sections.nepal.style.display = 'block';
+            } else if (country === 'Bhutan') {
+                sections.bhutan.style.display = 'block';
+                handleBhutanGradingSystemChange();
+            } else if (country === 'Vietnam') {
+                sections.vietnam.style.display = 'block';
+            } else if (['Tajikistan', 'Uzbekistan', 'Kosovo', 'Bosnia'].includes(country)) {
+                sections.tajik.style.display = 'block';
+            } else if (['Yemen', 'Sudan', 'Afghanistan', 'Palestine', 'Saudi Arabia', 'Indonesia', 'Somalia'].includes(country)) {
+                standardizedFields.style.display = 'block'; // Show standardized fields
+            } else if (country) {
+                manualCalculationMessage.innerHTML = `
+                    <p>Your country's grading system is not yet available. Please calculate your CGPA manually or contact the admission unit for assistance.</p>
+                `;
+                manualCalculationMessage.style.display = 'block'; // Show updated manual calculation message
+            }
+        }
+
+        // Handle Sri Lanka exam type change
+        function handleSriLankaExamTypeChange() {
+            const examType = document.getElementById('sriLankaExamType').value;
+            document.getElementById('sriLankaOLvlContainer').style.display = 
+                examType === 'olevel' ? 'block' : 'none';
+            document.getElementById('sriLankaALvlContainer').style.display = 
+                examType === 'alevel' ? 'block' : 'none';
+            calculateCgpa();
+        }
+
+        // Handle Bhutan grading system change
+        function handleBhutanGradingSystemChange() {
+            const system = document.getElementById('bhutanGradingSystem').value;
+            document.getElementById('bhutanScaleGradesContainer').style.display = 
+                system === 'scale1-9' ? 'block' : 'none';
+            document.getElementById('bhutanMarksGradesContainer').style.display = 
+                system === 'marks' ? 'block' : 'none';
+            document.getElementById('bhutanScaleBtn').style.display = 
+                system === 'scale1-9' ? 'inline-block' : 'none';
+            document.getElementById('bhutanMarksBtn').style.display = 
+                system === 'marks' ? 'inline-block' : 'none';
+            calculateCgpa();
+        }
+
+        // Handle Bhutan marks scale change
+        function handleBhutanMarksScaleChange() {
+            calculateCgpa();
+        }
+
+        // Add course field for Malaysia/West Africa
+        function addCourseField(system) {
+            const container = document.getElementById(`${system}GradesContainer`);
+            if (!container) return;
+
+            const courseCount = container.children.length + 1;
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-grade';
+
+            let optionsHtml = '<option value="">Select Grade</option>';
+            const grades = gradeSystems[system]?.grades || {};
+            
+            for (const [grade, value] of Object.entries(grades)) {
+                const points = typeof value === 'object' ? value.points : value;
+                optionsHtml += `<option value="${points}">${grade} (${points.toFixed(2)})</option>`;
+            }
+
+            newCourse.innerHTML = `
+                <label>Course ${courseCount}</label>
+                <select class="grade-input" data-system="${system}" onchange="calculateCgpa()">
+                    ${optionsHtml}
+                </select>
+            `;
+
+            container.appendChild(newCourse);
+        }
+
+        // Add Sri Lanka course field
+        function addSriLankaCourseField(examType) {
+            const container = examType === 'olevel' 
+                ? document.getElementById('sriLankaOLvlContainer')
+                : document.getElementById('sriLankaALvlContainer');
+                
+            if (!container) return;
+
+            const subjectCount = container.children.length + 1;
+            const gradeMap = examType === 'olevel' 
+                ? gradeSystems.sriLanka.olevel 
+                : gradeSystems.sriLanka.alevel;
+            
+            const newSubject = document.createElement('div');
+            newSubject.className = 'course-grade';
+            
+            let optionsHtml = '<option value="">Select Grade</option>';
+            for (const [grade, value] of Object.entries(gradeMap)) {
+                const desc = examType === 'olevel'
+                    ? (grade === 'A' ? 'Distinction' : 
+                       grade === 'B' ? 'Very Good Pass' : 
+                       grade === 'C' ? 'Credit Pass' : 
+                       grade === 'S' ? 'Ordinary Pass' : 'Weak/Fail')
+                    : (grade === 'A' ? 'Distinction' : 
+                       grade === 'B' ? 'Very Good Pass' : 
+                       grade === 'C' ? 'Credit Pass' : 
+                       grade === 'S' ? 'Ordinary Pass' : 'Weak/Fail');
+                
+                optionsHtml += `<option value="${value}">${grade} (${desc} - ${value.toFixed(2)})</option>`;
+            }
+            
+            newSubject.innerHTML = `
+                <label>Subject ${subjectCount}</label>
+                <select class="sri-lanka-grade" data-exam="${examType}" onchange="calculateCgpa()">
+                    ${optionsHtml}
+                </select>
+            `;
+            
+            container.appendChild(newSubject);
+        }
+
+        // Add French course field
+        function addFrenchCourseField() {
+            const container = document.getElementById('frenchGradesContainer');
+            if (!container) return;
+
+            const courseCount = container.children.length + 1;
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-grade';
+            
+            let optionsHtml = '<option value="">Select Grade</option>';
+            
+            if (gradeSystems.french && gradeSystems.french.grades) {
+                for (const [range, data] of Object.entries(gradeSystems.french.grades)) {
+                    if (data && data.points !== undefined) {
+                        optionsHtml += `<option value="${data.points}">${range} (${data.desc || ''}) - ${data.letter || ''} (${Number(data.points).toFixed(2)})</option>`;
+                    }
+                }
+            }
+            
+            newCourse.innerHTML = `
+                <label>Course ${courseCount}</label>
+                <select class="french-grade" onchange="calculateCgpa()">
+                    ${optionsHtml}
+                </select>
+            `;
+            
+            container.appendChild(newCourse);
+        }
+
+        // Add Myanmar course field
+        function addMyanmarCourseField() {
+            const container = document.getElementById('myanmarGradesContainer');
+            if (!container) return;
+
+            const courseCount = container.children.length + 1;
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-grade';
+            
+            let optionsHtml = '<option value="">Select Grade</option>';
+            for (const [range, data] of Object.entries(gradeSystems.myanmar.grades)) {
+                optionsHtml += `<option value="${data.points}">${range} (${data.grade} - ${data.desc}) - ${data.points.toFixed(2)})</option>`;
+            }
+            
+            newCourse.innerHTML = `
+                <label>Course ${courseCount}</label>
+                <select class="myanmar-grade" onchange="calculateCgpa()">
+                    ${optionsHtml}
+                </select>
+            `;
+            
+            container.appendChild(newCourse);
+        }
+
+        // Add Nepal course field
+        function addNepalCourseField() {
+            const container = document.getElementById('nepalGradesContainer');
+            if (!container) return;
+
+            const courseCount = container.children.length + 1;
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-grade';
+            
+            let optionsHtml = '<option value="">Select Grade</option>';
+            for (const [range, data] of Object.entries(gradeSystems.nepal.grades)) {
+                optionsHtml += `<option value="${data.points}">${range} (${data.grade} - ${data.desc}) - ${data.points.toFixed(2)})</option>`;
+            }
+            
+            newCourse.innerHTML = `
+                <label>Course ${courseCount}</label>
+                <select class="nepal-grade" onchange="calculateCgpa()">
+                    ${optionsHtml}
+                </select>
+            `;
+            
+            container.appendChild(newCourse);
+        }
+
+        // Add Bhutan scale (1-9) course field
+        function addBhutanScaleCourseField() {
+            const container = document.getElementById('bhutanScaleGradesContainer');
+            if (!container) return;
+
+            const courseCount = container.children.length + 1;
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-grade';
+            
+            let optionsHtml = '<option value="">Select Grade</option>';
+            for (const [range, data] of Object.entries(gradeSystems.bhutan.scale1to9)) {
+                optionsHtml += `<option value="${data.points}">${range} (${data.grade} - ${data.desc}) - ${data.points.toFixed(2)})</option>`;
+            }
+            
+            newCourse.innerHTML = `
+                <label>Course ${courseCount}</label>
+                <select class="bhutan-scale-grade" onchange="calculateCgpa()">
+                    ${optionsHtml}
+                </select>
+            `;
+            
+            container.appendChild(newCourse);
+        }
+
+        // Add Bhutan marks course field
+        function addBhutanMarksCourseField() {
+            const container = document.getElementById('bhutanMarksGradesContainer');
+            if (!container) return;
+
+            const courseCount = container.children.length + 1;
+            const scale = document.getElementById('bhutanMarksScale').value;
+            const gradeMap = gradeSystems.bhutan.marks[scale];
+            
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-grade';
+            
+            let optionsHtml = '<option value="">Select Grade</option>';
+            for (const [range, data] of Object.entries(gradeMap)) {
+                optionsHtml += `<option value="${data.points}">${range} (${data.grade} - ${data.desc}) - ${data.points.toFixed(2)})</option>`;
+            }
+            
+            newCourse.innerHTML = `
+                <label>Course ${courseCount}</label>
+                <div class="input-group">
+                    <input type="number" class="bhutan-marks-input" placeholder="Enter marks" min="0" max="${scale}" step="1" onchange="calculateBhutanMarksGrade(this)">
+                    <select class="bhutan-marks-grade" onchange="calculateCgpa()" disabled>
+                        ${optionsHtml}
+                    </select>
+                </div>
+            `;
+            
+            container.appendChild(newCourse);
+        }
+
+        // Add Vietnam course field
+        function addVietnamCourseField() {
+            const container = document.getElementById('vietnamGradesContainer');
+            if (!container) return;
+
+            const courseCount = container.children.length + 1;
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-grade';
+
+            let optionsHtml = '<option value="">Select Grade</option>';
+            for (const [range, data] of Object.entries(gradeSystems.vietnam.grades)) {
+                optionsHtml += `<option value="${data.points}">${range} (${data.desc}) - ${data.letter} (${data.points.toFixed(2)})</option>`;
+            }
+
+            newCourse.innerHTML = `
+                <label>Course ${courseCount}</label>
+                <select class="vietnam-grade" onchange="calculateCgpa()">
+                    ${optionsHtml}
+                </select>
+            `;
+
+            container.appendChild(newCourse);
+        }
+
+        // Add Tajikistan/Uzbekistan/Kosovo/Bosnia course field
+        function addTajikCourseField() {
+            const container = document.getElementById('tajikGradesContainer');
+            if (!container) return;
+
+            const courseCount = container.children.length + 1;
+            const newCourse = document.createElement('div');
+            newCourse.className = 'course-grade';
+
+            let optionsHtml = '<option value="">Select Grade</option>';
+            for (const [range, data] of Object.entries(gradeSystems.tajik.grades)) {
+                optionsHtml += `<option value="${data.points}">${range} (${data.desc}) - ${data.letter} (${data.points.toFixed(2)})</option>`;
+            }
+
+            newCourse.innerHTML = `
+                <label>Course ${courseCount}</label>
+                <select class="tajik-grade" onchange="calculateCgpa()">
+                    ${optionsHtml}
+                </select>
+            `;
+
+            container.appendChild(newCourse);
+        }
+
+        // Calculate Bhutan marks grade based on input
+        function calculateBhutanMarksGrade(inputElement) {
+            const marks = parseFloat(inputElement.value);
+            const scale = document.getElementById('bhutanMarksScale').value;
+            const gradeMap = gradeSystems.bhutan.marks[scale];
+            const selectElement = inputElement.nextElementSibling;
+            
+            if (isNaN(marks)) {
+                selectElement.value = "";
+                selectElement.disabled = true;
+                return;
+            }
+            
+            // Find the matching grade range
+            for (const [range, data] of Object.entries(gradeMap)) {
+                const [min, max] = range.split('-').map(Number);
+                if (marks >= min && marks <= max) {
+                    selectElement.value = data.points;
+                    break;
+                }
+            }
+            
+            selectElement.disabled = false;
+            calculateCgpa();
+        }
+
+        // Calculate CGPA from entered grades
+        function calculateCgpa() {
+            const country = document.getElementById('country').value;
+            let totalPoints = 0;
+            let validCourses = 0;
+
+            console.log(`Calculating CGPA for country: ${country}`); // Debugging log
+
+            // Check which grading system to use
+            if (country === 'Malaysia') {
+                document.querySelectorAll('.grade-input[data-system="malaysia"]').forEach(select => {
+                    if (select.value) {
+                        totalPoints += parseFloat(select.value);
+                        validCourses++;
+                    }
+                });
+            } 
+            else if (gradeSystems.westAfrica.countries.includes(country)) {
+                document.querySelectorAll('.grade-input[data-system="westAfrica"]').forEach(select => {
+                    if (select.value) {
+                        totalPoints += parseFloat(select.value);
+                        validCourses++;
+                    }
+                });
+            }
+            else if (country === 'Sri Lanka') {
+                const examType = document.getElementById('sriLankaExamType').value;
+                document.querySelectorAll(`.sri-lanka-grade[data-exam="${examType}"]`).forEach(select => {
+                    if (select.value) {
+                        totalPoints += parseFloat(select.value);
+                        validCourses++;
+                    }
+                });
+            }
+            else if (gradeSystems.french.countries.includes(country)) {
+                document.querySelectorAll('.french-grade').forEach(select => {
+                    if (select.value) {
+                        totalPoints += parseFloat(select.value);
+                        validCourses++;
+                    }
+                });
+            }
+            else if (country === 'Myanmar') {
+                document.querySelectorAll('.myanmar-grade').forEach(select => {
+                    if (select.value) {
+                        totalPoints += parseFloat(select.value);
+                        validCourses++;
+                    }
+                });
+            }
+            else if (country === 'Nepal') {
+                document.querySelectorAll('.nepal-grade').forEach(select => {
+                    if (select.value) {
+                        totalPoints += parseFloat(select.value);
+                        validCourses++;
+                    }
+                });
+            }
+            else if (country === 'Bhutan') {
+                const system = document.getElementById('bhutanGradingSystem').value;
+                if (system === 'scale1-9') {
+                    document.querySelectorAll('.bhutan-scale-grade').forEach(select => {
+                        if (select.value) {
+                            totalPoints += parseFloat(select.value);
+                            validCourses++;
+                        }
+                    });
+                } else {
+                    document.querySelectorAll('.bhutan-marks-grade').forEach(select => {
+                        if (select.value && !select.disabled) {
+                            totalPoints += parseFloat(select.value);
+                            validCourses++;
+                        }
+                    });
+                }
+            }
+            else if (country === 'Vietnam') {
+                document.querySelectorAll('.vietnam-grade').forEach(select => {
+                    if (select.value) {
+                        totalPoints += parseFloat(select.value);
+                        validCourses++;
+                    }
+                });
+            }
+            else if (['Tajikistan', 'Uzbekistan', 'Kosovo', 'Bosnia'].includes(country)) {
+                document.querySelectorAll('.tajik-grade').forEach(select => {
+                    if (select.value) {
+                        totalPoints += parseFloat(select.value);
+                        validCourses++;
+                    }
+                });
+            }
+
+            // Calculate and display CGPA
+            if (validCourses > 0) {
+                const cgpa = (totalPoints / validCourses).toFixed(2);
+                console.log(`Total Points: ${totalPoints}, Valid Courses: ${validCourses}, CGPA: ${cgpa}`); // Debugging log
+
+                const calculatedSection = document.getElementById('calculatedCgpaField');
+                calculatedSection.innerHTML = `
+                    <h3>Calculated CGPA</h3>
+                    <p>Your calculated CGPA is: <strong>${cgpa}</strong></p>
+                    <p>Based on ${validCourses} course(s)</p>
+                `;
+                calculatedSection.style.display = 'block';
+            } else {
+                console.log('No valid courses found.'); // Debugging log
+
+                const calculatedSection = document.getElementById('calculatedCgpaField');
+                calculatedSection.innerHTML = `
+                    <h3>Calculated CGPA</h3>
+                    <p style="color: var(--error-red);">No valid grades entered. Please try again.</p>
+                `;
+                calculatedSection.style.display = 'block';
+            }
+        }
+
+        // Function to reset all grade inputs
+        function resetGradeInputs() {
+            document.querySelectorAll('.course-grade').forEach(course => {
+                course.remove();
+            });
+            document.getElementById('calculatedCgpa').value = '';
+            document.getElementById('cgpa').value = '';
+            document.getElementById('calculatedCgpaField').style.display = 'none';
+        }
+
+        // Function to validate form before submission
+        function validateForm() {
+            const country = document.getElementById('country').value;
+            if (!country) {
+                alert('Please select your country of origin');
+                return false;
+            }
+
+            // Check if we have calculated CGPA or manual input
+            const cgpa = document.getElementById('cgpa').value;
+            if (!cgpa) {
+                alert('Please calculate or enter your CGPA');
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>

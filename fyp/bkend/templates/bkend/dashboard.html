@@ -1,0 +1,693 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard | AIU</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2C3E50;
+            --secondary-color: #1ABC9C;
+            --accent-color: #3498DB;
+            --dark-color: #1A252F;
+            --light-color: #ECF0F1;
+            --warning-color: #E74C3C;
+            --success-color: #27AE60;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #F5F7FA;
+            color: #333;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background: var(--primary-color);
+            color: white;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 25px 0;
+            box-shadow: var(--box-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo-container {
+            text-align: center;
+            padding: 0 25px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .logo-container img {
+            width: 120px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        
+        .logo-container h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--light-color);
+        }
+        
+        .nav-menu {
+            flex-grow: 1;
+            padding: 0 15px;
+            overflow-y: auto;
+        }
+        
+        .nav-menu a {
+            color: var(--light-color);
+            text-decoration: none;
+            display: block;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 5px;
+            transition: var(--transition);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        
+        .nav-menu a:hover, .nav-menu a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .nav-menu a i {
+            width: 24px;
+            text-align: center;
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            padding: 30px;
+            background-color: #F5F7FA;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .user-info h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .user-info .student-id {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            color: #7F8C8D;
+        }
+        
+        .user-info .student-id i {
+            margin-right: 8px;
+            color: var(--accent-color);
+        }
+        
+        .profile-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+        
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid var(--secondary-color);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.2);
+        }
+        
+        .profile-pic:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 5px rgba(26, 188, 156, 0.3);
+        }
+        
+        .profile-upload {
+            display: none;
+        }
+        
+        .upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+            border: 2px solid white;
+        }
+        
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            transition: var(--transition);
+            box-shadow: var(--box-shadow);
+            border-top: 4px solid var(--secondary-color);
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(26, 188, 156, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+        
+        .card-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .card-content {
+            margin-bottom: 20px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            margin-right: 10px;
+        }
+        
+        .status-submitted {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(39, 174, 96, 0.3);
+        }
+        
+        .status-pending {
+            background: rgba(241, 196, 15, 0.1);
+            color: #F39C12;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 10px 18px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #16A085;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(26, 188, 156, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(26, 188, 156, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #C0392B;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .submission-info {
+            font-size: 0.85rem;
+            color: #95A5A6;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .submission-info i {
+            margin-right: 8px;
+        }
+        
+        .sidebar-footer {
+            padding: 15px 25px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .upload-form {
+            display: none;
+        }
+        
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            body {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                height: auto;
+                position: relative;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .profile-container {
+                align-self: flex-end;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            /* Notification Styles */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+}
+
+.notification {
+    padding: 12px 20px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: slideIn 0.3s ease-out;
+    box-shadow: var(--box-shadow);
+}
+
+.notification.success {
+    background-color: var(--success-color);
+}
+
+.notification.error {
+    background-color: var(--warning-color);
+}
+
+.notification.info {
+    background-color: var(--accent-color);
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* Auto-hide animation */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="{% static 'images/logo.png' %}" alt="AIU Logo">
+            <h2>Albukhary International University</h2>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="{% url 'dashboard' %}" class="active">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            <a href="{% url 'program_selection' %}">
+                <i class="fas fa-list-ol"></i> Program Selection
+            </a>
+            <a href="{% url 'basic_info' %}">
+                <i class="fas fa-user-graduate"></i> Student Profile
+            </a>
+            <a href="{% url 'academic_info' %}">
+                <i class="fas fa-book-open"></i> Academic Info
+            </a>
+            <a href="{% url 'financial_info' %}">
+                <i class="fas fa-wallet"></i> Financial Info
+            </a>
+            <a href="{% url 'document-uploading' %}">
+                <i class="fas fa-cloud-upload-alt"></i> Documents
+            </a>
+            <a href="{% url 'declaration-submission' %}">  <!-- No forced highlight -->
+                <i class="fas fa-check-circle"></i> Declaration
+            </a>
+            <a href="{% url 'view_status' %}">
+                <i class="fas fa-clipboard-list"></i> Application Status
+            </a>
+            <a href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            © 2025 AIU Applicaton Portal
+        </div>
+    </div>
+    
+    <!-- Main Content Area -->
+    <div class="main-content">
+     {% if messages %}
+    <div class="notification-container">
+        {% for message in messages %}
+        <div class="notification {% if message.tags %}{{ message.tags }}{% endif %}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+        <!-- Header with User Info -->
+        <div class="header">
+            <div class="user-info">
+                <h1>Welcome, {{ user.first_name }} {{ user.last_name }}</h1>
+                <div class="student-id">
+                    <i class="fas fa-id-card"></i>
+                    <span>Identity Number: {{ user.identity_card|default:"N/A" }} | Email: {{ user.primary_email }}</span>
+                </div>
+            </div>
+            
+            <div class="profile-container">
+                <form id="profile-form" method="post" action="{% url 'upload_profile_pic' %}" enctype="multipart/form-data" class="upload-form">
+                    {% csrf_token %}
+                    <input type="file" id="profile-upload" name="profile_pic" accept="image/*">
+                </form>
+                
+                <label for="profile-upload" style="cursor: pointer;">
+                    <img id="profile-preview" 
+                         src="{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}{% static 'images/default_profile.jpg' %}{% endif %}" 
+                         class="profile-pic" 
+                         alt="Profile Picture"
+                         title="Click to update profile picture">
+                    <div class="upload-btn">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </label>
+            </div>
+        </div>
+    
+        <!-- Dashboard Cards -->
+        <div class="dashboard-grid">
+            <!-- Application Status Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <h2 class="card-title">Application Status</h2>
+                </div>
+                
+                <div class="card-content">
+                    {% if submitted %}
+                        <span class="status-badge status-submitted">
+                            <i class="fas fa-check-circle"></i> Submitted for Review
+                        </span>
+                        <div class="submission-info">
+                            <i class="far fa-calendar-alt"></i>
+                            Submitted on: {{ user.submission_date|date:"F d, Y H:i" }}
+                        </div>
+                    {% elif existing_app %}
+                        <span class="status-badge status-pending">
+                            <i class="fas fa-pencil-alt"></i> Draft in Progress
+                        </span>
+                        <p>Your application is currently in draft status. Please complete all required sections.</p>
+                    {% else %}
+                        <p>Welcome to the AIU application portal. Begin your journey by starting a new application.</p>
+                    {% endif %}
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="{% url 'view_status' %}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+    
+           <!-- Application Actions Card -->
+<div class="dashboard-card">
+    <div class="card-header">
+        <div class="card-icon">
+            <i class="fas fa-rocket"></i>
+        </div>
+        <h2 class="card-title">Application Actions</h2>
+    </div>
+    
+    <div class="card-content">
+        {% if submitted %}
+            <p>Your application is being reviewed by our admissions team. You'll be notified when a decision is made.</p>
+        {% elif existing_app %}
+            <p>Continue working on your draft application or start fresh if needed.</p>
+        {% else %}
+            <p>Begin your application process to join our academic community.</p>
+        {% endif %}
+    </div>
+    
+    <div class="action-buttons">
+        {% if submitted %}
+            {# No buttons shown for submitted applications #}
+        {% elif existing_app %}
+            <a href="{% url 'program_selection' %}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Continue
+            </a>
+            <a href="{% url 'new_application' %}" class="btn btn-outline">
+                <i class="fas fa-sync-alt"></i> Restart
+            </a>
+            <form method="post" action="{% url 'delete_application' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" 
+                    onclick="return confirm('Are you sure you want to delete your draft application? This action cannot be undone.')">
+                    <i class="fas fa-trash-alt"></i> Delete
+                </button>
+            </form>
+        {% else %}
+            <a href="{% url 'program_selection' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle"></i> Start Application
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+            <!-- Quick Links Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h2 class="card-title">Quick Links</h2>
+                </div>
+                
+                <div class="card-content">
+                    <ul style="list-style-type: none; padding: 0; margin: 0;">
+                        <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <a href="#" style="text-decoration: none; color: var(--primary-color);">
+                                <i class="fas fa-calendar-alt" style="color: var(--accent-color); margin-right: 10px;"></i>
+                                Academic Calendar
+                            </a>
+                        </li>
+                        <li style="padding: 8px 0; border-bottom: 1px solid #eee;">
+                            <a href="#" style="text-decoration: none; color: var(--primary-color);">
+                                <i class="fas fa-book" style="color: var(--accent-color); margin-right: 10px;"></i>
+                                Course Catalog
+                            </a>
+                        </li>
+                        <li style="padding: 8px 0;">
+                            <a href="#" style="text-decoration: none; color: var(--primary-color);">
+                                <i class="fas fa-question-circle" style="color: var(--accent-color); margin-right: 10px;"></i>
+                                Help Center
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="action-buttons">
+                    <a href="#" class="btn btn-outline">
+                        <i class="fas fa-external-link-alt"></i> University Website
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript for Profile Picture Upload -->
+    <script>
+        document.getElementById('profile-upload').addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                
+                // Show preview immediately
+                reader.onload = function(event) {
+                    document.getElementById('profile-preview').src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+                
+                // Validate file before upload
+                const validTypes = ['image/jpeg', 'image/png'];
+                const maxSize = 2 * 1024 * 1024; // 2MB
+                
+                if (!validTypes.includes(file.type)) {
+                    alert('Error: Only JPG/PNG images are allowed');
+                    resetFileInput();
+                    return;
+                }
+                
+                if (file.size > maxSize) {
+                    alert('Error: Image must be smaller than 2MB');
+                    resetFileInput();
+                    return;
+                }
+                
+                // Upload to server
+                const form = document.getElementById('profile-form');
+                const formData = new FormData(form);
+                
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Update the image src with the new URL to prevent caching issues
+                        document.getElementById('profile-preview').src = data.url + '?t=' + new Date().getTime();
+                    } else {
+                        throw new Error(data.error || 'Unknown error occurred');
+                    }
+                })
+                .catch(error => {
+                    console.error('Upload error:', error);
+                    alert('Upload failed: ' + error.message);
+                    resetFileInput();
+                });
+                
+                function resetFileInput() {
+                    // Reset the input and revert to original image
+                    e.target.value = '';
+                    document.getElementById('profile-preview').src = "{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}{% static 'images/default_profile.jpg' %}{% endif %}";
+                }
+            }
+        });
+    </script>
+    <script>
+// Auto-hide notifications after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    const notifications = document.querySelectorAll('.notification');
+    notifications.forEach(notification => {
+        setTimeout(() => {
+            notification.style.animation = 'fadeOut 0.5s ease';
+            setTimeout(() => notification.remove(), 500);
+        }, 5000);
+    });
+});
+</script>
+</body>
+</html>

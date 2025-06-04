@@ -1,0 +1,872 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIU Online Application | AlBukhary International University</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #003366;
+            --secondary-gold: #FFD700;
+            --accent-teal: #008080;
+            --light-bg: #F8F9FA;
+            --dark-text: #333333;
+            --white: #FFFFFF;
+            --error-red: #E74C3C;
+            --success-green: #2ECC71;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            position: relative;
+            min-height: 100vh;
+            padding-bottom: 250px; /* Space for footer */
+        }
+        
+        /* Header Styles */
+        .header {
+            width: 100%;
+            background-color: var(--primary-blue);
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .header.scrolled {
+            padding: 10px 5%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-container img {
+            height: 60px;
+            transition: all 0.3s ease;
+        }
+        
+        .header.scrolled .logo-container img {
+            height: 50px;
+        }
+        
+        .university-name {
+            margin-left: 15px;
+            color: var(--white);
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .nav-links a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .school-image {
+            height: 120px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        /* Optional: Add overlay for better text contrast */
+        .school-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 51, 102, 0.3); /* Semi-transparent blue overlay */
+        }
+        
+        .nav-links a:hover {
+            color: var(--secondary-gold);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--secondary-gold);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 51, 102, 0.8), rgba(0, 80, 80, 0.8)), 
+                        url('{% static 'images/conv.jpg' %}') center/cover no-repeat;
+            height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--white);
+            margin-top: 80px;
+            padding: 0 5%;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            animation: fadeInUp 1s ease;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease 0.3s forwards;
+            opacity: 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--secondary-gold);
+            color: var(--primary-blue);
+            padding: 12px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            animation: fadeInUp 1s ease 0.6s forwards;
+            opacity: 0;
+        }
+        
+        .cta-button:hover {
+            background-color: var(--white);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Main Content */
+        .main-content {
+            display: flex;
+            justify-content: space-between;
+            padding: 80px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .about-section {
+            flex: 1;
+            padding-right: 40px;
+            animation: fadeInLeft 1s ease;
+        }
+        
+        .about-section h2 {
+            color: var(--primary-blue);
+            font-size: 2rem;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .about-section h2::after {
+            content: '';
+            position: absolute;
+            width: 80px;
+            height: 4px;
+            background-color: var(--secondary-gold);
+            bottom: -10px;
+            left: 0;
+        }
+        
+        .about-section p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .schools-showcase {
+            margin-top: 40px;
+        }
+        
+        .schools-showcase h3 {
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+        
+        .schools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .school-card {
+            background-color: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        .school-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .school-info {
+            padding: 15px;
+        }
+        
+        .school-info h4 {
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+        }
+        
+        /* Eligibility Form Styles */
+        .eligibility-container {
+            width: 400px;
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            animation: fadeInRight 1s ease;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--primary-blue);
+        }
+        
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: var(--white);
+        }
+        
+        .form-group select:focus,
+        .form-group input:focus {
+            border-color: var(--accent-teal);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1);
+        }
+        
+        .check-button {
+            width: 100%;
+            background-color: var(--primary-blue);
+            color: var(--white);
+            border: none;
+            padding: 12px;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .check-button:hover {
+            background-color: var(--accent-teal);
+        }
+        
+        .eligibility-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .eligible {
+            background-color: rgba(46, 204, 113, 0.2);
+            border: 1px solid var(--success-green);
+            color: var(--success-green);
+        }
+        
+        .not-eligible {
+            background-color: rgba(231, 76, 60, 0.2);
+            border: 1px solid var(--error-red);
+            color: var(--error-red);
+        }
+        
+        .eligibility-result h3 {
+            margin-bottom: 10px;
+        }
+        
+        .eligibility-result p {
+            margin-bottom: 10px;
+        }
+        
+        .login-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: var(--success-green);
+            color: var(--white);
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .login-link:hover {
+            background-color: #27ae60;
+        }
+        
+        /* Footer */
+        .footer {
+            background-color: var(--primary-blue);
+            color: var(--white);
+            padding: 60px 5% 30px;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+        }
+        
+        .footer-column h3 {
+            color: var(--secondary-gold);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 2px;
+            background-color: var(--secondary-gold);
+            bottom: 0;
+            left: 0;
+        }
+        
+        .footer-column p, .footer-column a {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+            display: block;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-column a:hover {
+            color: var(--secondary-gold);
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .contact-icon {
+            color: var(--secondary-gold);
+            margin-right: 10px;
+            margin-top: 3px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--secondary-gold);
+            color: var(--primary-blue);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+                padding: 60px 5%;
+            }
+            
+            .about-section {
+                padding-right: 0;
+                margin-bottom: 50px;
+            }
+            
+            .eligibility-container {
+                width: 100%;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                padding: 15px;
+            }
+            
+            .logo-container {
+                margin-bottom: 15px;
+            }
+            
+            .nav-links {
+                gap: 15px;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .schools-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="mainHeader">
+        <div class="logo-container">
+            <img src="{% static 'images/logo.png' %}" alt="AIU Logo">
+            <div class="university-name">Albukhary International University</div>
+        </div>
+        <nav class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Programs</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Shape Your Future With AIU</h1>
+            <p>Join Malaysia's leading international university with world-class facilities and globally recognized programs</p>
+            <a href="#eligibility" class="cta-button">Check Your Eligibility</a>
+        </div>
+    </section>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="about-section">
+            <h2>Application guidlines</h2>
+            <p>AlBukhary International University (AIU) offers a transformative educational experience through our diverse range of undergraduate and postgraduate programs. Our online application system provides a seamless way to begin your academic journey with us.</p>
+            <p>The application process consists of two steps. First, you will check your eligibility for the application. If you are eligible, you will be redirected and can proceed to apply. If not eligible, please note that the requirements change each year, so you may try again next year.</p
+
+            
+            <div class="schools-showcase">
+                <h3>Our Schools & Faculties</h3>
+                <div class="schools-grid">
+                    <div class="school-card">
+                        <a href="https://aiu.edu.my/school-of-business-social-sciences/" target="_blank" rel="noopener noreferrer">
+                            <div class="school-image" style="background-image: url('{% static 'images/buspic.jpg' %}'); background-size: cover; background-position: center;"></div>
+                        </a>
+                        <div class="school-info">
+                            <h4>School of Business and Social Sciences</h4>
+                            <p>ACCA-accredited programs in business, economics, and social sciences</p>
+                        </div>
+                    </div>
+                    <div class="school-card">
+                        <a href="https://aiu.edu.my/school-of-business-social-sciences/" target="_blank" rel="noopener noreferrer">
+                           <div class="school-image" style="background-image: url('{% static 'images/sehs.jpg' %}');"></div> 
+                        </a>
+                        
+                        <div class="school-info">
+                            <h4>School of Education and Human Sciences</h4>
+                            <p>Innovative teaching methodologies and human development programs</p>
+                        </div>
+                    </div>
+                    <div class="school-card">
+                       <a href="https://aiu.edu.my/school-of-computing-and-informatics/" target="_blank" rel="noopener noreferrer">
+                            <div class="school-image" style="background-image: url('{% static 'images/bg.jpg' %}');"></div>
+                        </a>
+                        <div class="school-info">
+                            <h4>School of Computing and Informatics</h4>
+                            <p>Cutting-edge technology and information systems programs</p>
+                        </div>
+                    </div>
+                    <div class="school-card">
+                        <div class="school-image" style="background-image: url('{% static 'images/foundation.jpg' %}'); background-size: cover; background-position: center;"></div>
+                        <div class="school-info">
+                            <h4>Centre of Foundation Studies</h4>
+                            <p>Advanced engineering programs with industry partnerships</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="eligibility-container" id="eligibility">
+            <h2>Eligibility Pre-Screening</h2>
+            <form id="eligibilityForm">
+                <div class="form-group">
+                    <label for="country">Country of Origin</label>
+                    <select id="country" required>
+                        <option value="">Select your country</option>
+                        {% for country in countries %}
+                            <option value="{{ country }}">{{ country }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cgpa">Previous CGPA</label>
+                    <input type="number" id="cgpa" step="0.01" min="0" max="4" placeholder="Enter your CGPA (0.0 - 4.0)" required>
+                    <small>
+                        <a href="{% url 'grades' %}" target="_blank">If you haven't converted your CGPA, please click here to convert it.</a>
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="marital-status">Marital Status</label>
+                    <select id="marital-status" required>
+                        <option value="">Select status</option>
+                        <option value="Single">Single</option>
+                        <option value="Married">Married</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" required>
+                        <option value="">Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date" id="dob" required onchange="calculateAge()">
+                </div>
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" readonly>
+                </div>
+                <button type="submit" class="check-button">Check Eligibility</button>
+            </form>
+            <div id="eligibilityResult" class="eligibility-result" style="display: none;">
+                <h3 id="resultTitle"></h3>
+                <p id="resultMessage"></p>
+                <div id="loginPrompt" style="display: none;">
+                    <a href="{% url 'login' %}" class="login-link">Proceed to Application</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <br>  
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <a href="#">Home</a>
+                <a href="#">About AIU</a>
+                <a href="#">Academic Programs</a>
+                <a href="#">Admissions</a>
+                <a href="#">Research</a>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Contact Us</h3>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt contact-icon"></i>
+                    <span>Jalan Tun Abdul Razak, 05200 Alor Setar, Kedah Darul Aman</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone contact-icon"></i>
+                    <span>+604-7747330 (Recruitment)</span>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope contact-icon"></i>
+                    <span>info@aiu.edu.my</span>
+                </div>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Academic</h3>
+                <a href="#">Undergraduate Programs</a>
+                <a href="#">Postgraduate Programs</a>
+                <a href="#">International Students</a>
+                <a href="#">Scholarships</a>
+                <a href="#">Academic Calendar</a>
+            </div>
+            
+            <div class="footer-column">
+                <h3>Connect With Us</h3>
+                <p>Follow our social media channels for the latest updates and news.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2025 AlBukhary International University. All Rights Reserved.
+        </div>
+    </footer>
+
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('mainHeader');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+        
+        // Animation for school cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const schoolCards = document.querySelectorAll('.school-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = 1;
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            schoolCards.forEach(card => {
+                card.style.opacity = 0;
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.5s ease';
+                observer.observe(card);
+            });
+        });
+
+        // Calculate age from date of birth
+        function calculateAge() {
+            const dob = document.getElementById('dob').value;
+            if (dob) {
+                const birthDate = new Date(dob);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                document.getElementById('age').value = age;
+            } else {
+                document.getElementById('age').value = '';
+            }
+        }
+
+        // Form submission handler
+        document.getElementById('eligibilityForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Get form values
+    const country = document.getElementById('country').value;
+    const gender = document.getElementById('gender').value;
+    const dob = document.getElementById('dob').value;
+    const maritalStatus = document.getElementById('marital-status').value;
+    const cgpa = parseFloat(document.getElementById('cgpa').value);
+    const age = parseInt(document.getElementById('age').value);
+    
+    // Parse the criteria data
+    const allCriteria = JSON.parse('{{ prescreening_criteria_json|escapejs }}');
+    
+    // Find applicable criteria for the selected country
+    const applicableCriteria = allCriteria.filter(criteria => {
+        // Check if country is in eligible countries
+        const isEligibleCountry = criteria.countries.length === 0 || 
+                                 criteria.countries.includes(country);
+        
+        // Check if country is not in ineligible countries
+        const isNotIneligible = !criteria.ineligible_countries.includes(country);
+        
+        return isEligibleCountry && isNotIneligible;
+    });
+    
+    if (applicableCriteria.length === 0) {
+        showResult(false, "Unfortunatly we are no taking application from you country this time you may try next year to check you eligibilty.");
+        return;
+    }
+    
+    // For now, use the first matching criteria
+    const criteria = applicableCriteria[0];
+    
+    // Rest of the checks remain the same...
+    const reasons = [];
+    
+    if (criteria.minimum_age && age < criteria.minimum_age) {
+        reasons.push(`Minimum age must be ${criteria.minimum_age}`);
+    }
+    if (criteria.maximum_age && age > criteria.maximum_age) {
+        reasons.push(`Maximum age must be ${criteria.maximum_age}`);
+    }
+    
+    if (criteria.minimum_cgpa && cgpa < criteria.minimum_cgpa) {
+        reasons.push(`CGPA must be at least ${criteria.minimum_cgpa.toFixed(2)}`);
+    }
+    
+    if (criteria.gender && gender !== criteria.gender) {
+        reasons.push(`Gender must be ${criteria.gender}`);
+    }
+    
+    if (criteria.marital_status && maritalStatus !== criteria.marital_status) {
+        reasons.push(`Marital status must be ${criteria.marital_status}`);
+    }
+    
+     if (reasons.length === 0) {
+                showResult(true, "Congratulations! You meet all eligibility criteria.");
+            } else {
+                showResult(false, ` Sorry You are not currently eligible for addmission . You don't meet the following requirements:<br>- ${reasons.join('<br>- ')}`);
+            }
+        });
+ 
+
+        function showResult(isEligible, message) {
+            const resultDiv = document.getElementById('eligibilityResult');
+            resultDiv.style.display = "block";
+            resultDiv.className = isEligible ? "eligibility-result eligible" : "eligibility-result not-eligible";
+            document.getElementById('resultTitle').textContent = isEligible ? "Eligible" : "Not Eligible";
+            document.getElementById('resultMessage').innerHTML = message;
+            document.getElementById('loginPrompt').style.display = isEligible ? "block" : "none";
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function getCriteriaForCountry(country) {
+            return prescreeningCriteria.find(criteria => criteria.country === country);
+        }
+
+        // Parse the criteria data passed from the view
+        const prescreeningCriteria = JSON.parse('{{ prescreening_criteria_json|escapejs }}').map(item => item.fields);
+    </script>
+</body>
+</html>
