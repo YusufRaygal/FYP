@@ -2,6 +2,16 @@
 
 A Django-based web application designed for managing student admissions for AIU. This system provides a comprehensive portal for prospective students to apply for programs, submit their details, and track their application status. It also includes an administrative dashboard for reviewing, shortlisting, and accepting applications based on specific prescreening criteria.
 
+## Project Glimpse
+
+### Landing Page
+![Landing Page](landingpage.png)
+
+### Applicant Dashboard
+![Applicant Dashboard](applicantDash.png)
+
+### Admission Dashboard
+![Admission Dashboard](admissiondashboard.png)
 ## Features
 
 ### Student Portal
