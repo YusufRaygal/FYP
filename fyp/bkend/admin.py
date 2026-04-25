@@ -17,11 +17,15 @@ admin.site.register(FinancialInfo)
 # Load countries dynamically into the Country model
 def load_countries():
     from .models import Country
-    for country in pycountry.countries:
-        try:
-            Country.objects.get_or_create(name=country.name)
-        except IntegrityError:
-            pass  # Skip duplicates
+    from django.db.utils import OperationalError, ProgrammingError
+    try:
+        for country in pycountry.countries:
+            try:
+                Country.objects.get_or_create(name=country.name)
+            except IntegrityError:
+                pass  # Skip duplicates
+    except (OperationalError, ProgrammingError):
+        pass
 
 # Call the function to load countries
 load_countries()
